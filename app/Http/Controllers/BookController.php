@@ -12,28 +12,71 @@ use Intervention\Image\Drivers\Gd\Driver;
 class BookController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Book::with('category');
+{
+    $query = Book::with('category');
 
-        // Filter by category if provided
-        if ($request->has('category')) {
-            $query->where('category_id', $request->category);
-        }
-
-        // Search by title or author
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('author', 'like', "%{$search}%");
-            });
-        }
-
-        $books = $query->paginate(12);
-        $categories = Category::all();
-
-        return view('books.index', compact('books', 'categories'));
+    // Search by title or author (full-text search)
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'ilike', "%{$search}%")
+                ->orWhere('author', 'ilike', "%{$search}%")
+                ->orWhere('description', 'ilike', "%{$search}%");
+        });
     }
+
+    // Filter by category
+    if ($request->filled('category')) {
+        $query->where('category_id', $request->category);
+    }
+
+    // Filter by price range
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    // Filter by rating
+    if ($request->filled('min_rating')) {
+        $query->whereHas('reviews', function ($q) use ($request) {
+            $q->havingRaw('AVG(rating) >= ?', [$request->min_rating]);
+        });
+    }
+
+    // Sort options
+    $sortBy = $request->get('sort', 'title'); // default sort by title
+    $sortOrder = $request->get('order', 'asc'); // default ascending
+
+    switch ($sortBy) {
+        case 'price_low':
+            $query->orderBy('price', 'asc');
+            break;
+        case 'price_high':
+            $query->orderBy('price', 'desc');
+            break;
+        case 'rating':
+            $query->withAvg('reviews', 'rating')
+                  ->orderBy('reviews_avg_rating', 'desc');
+            break;
+        case 'newest':
+            $query->orderBy('created_at', 'desc');
+            break;
+        case 'oldest':
+            $query->orderBy('created_at', 'asc');
+            break;
+        case 'title':
+        default:
+            $query->orderBy('title', $sortOrder);
+            break;
+    }
+
+    $books = $query->paginate(12)->withQueryString(); // Keep filters in pagination
+    $categories = Category::all();
+
+    return view('books.index', compact('books', 'categories'));
+}
 
     public function create()
     {

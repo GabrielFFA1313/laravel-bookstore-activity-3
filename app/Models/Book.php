@@ -62,8 +62,9 @@ class Book extends Model
     // Get thumbnail URL with fallback
     public function getThumbnailUrlAttribute()
     {
-        if ($this->thumbnail) {
-            return asset('storage/' . $this->thumbnail);
+        if ($this->cover_image) {
+            // If using the simple upload (no thumbnails), use main image
+            return asset('storage/' . $this->cover_image);
         }
         return asset('images/placeholder-book.png');
     }
