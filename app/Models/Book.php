@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Book extends Model
 {
-  use HasFactory;
+    use HasFactory;
+
     protected $fillable = [
         'category_id',
         'title',
@@ -17,7 +18,8 @@ class Book extends Model
         'stock_quantity',
         'description',
         'cover_image',
-        ];
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -32,9 +34,37 @@ class Book extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
     // Accessor for average rating
     public function getAverageRatingAttribute()
     {
         return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    // Get thumbnail path
+    public function getThumbnailAttribute()
+    {
+        if ($this->cover_image) {
+            return 'thumbnails/' . basename($this->cover_image);
+        }
+        return null;
+    }
+
+    // Get cover image URL with fallback to placeholder
+    public function getCoverImageUrlAttribute()
+    {
+        if ($this->cover_image) {
+            return asset('storage/' . $this->cover_image);
+        }
+        return asset('images/placeholder-book.png');
+    }
+
+    // Get thumbnail URL with fallback
+    public function getThumbnailUrlAttribute()
+    {
+        if ($this->thumbnail) {
+            return asset('storage/' . $this->thumbnail);
+        }
+        return asset('images/placeholder-book.png');
     }
 }

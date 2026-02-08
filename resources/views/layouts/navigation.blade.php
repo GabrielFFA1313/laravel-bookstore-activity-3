@@ -22,28 +22,17 @@
                         {{ __('Categories') }}
                     </x-nav-link>
                     @auth
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ auth()->user()->isAdmin() ? __('Orders') : __('My Orders') }}
+                        </x-nav-link>
                         @if(!auth()->user()->isAdmin())
-                            <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                                {{ __('My Orders') }}
-                            </x-nav-link>
                             <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
                                 {{ __('Cart') }}
                             </x-nav-link>
                         @endif
                     @endauth
-                     @auth
-                            <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                                {{ auth()->user()->isAdmin() ? __('Orders') : __('My Orders') }}
-                            </x-nav-link>
-                            @if(!auth()->user()->isAdmin())
-                                <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
-                                    {{ __('Cart') }}
-                                </x-nav-link>
-                            @endif
-                    @endauth
                 </div>
             </div>
-
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -86,14 +75,11 @@
                     </x-dropdown>
                 @else
                     <div class="flex gap-4">
-                        <a href="{{ route('login') }}"
-                        class="text-sm text-gray-700 hover:text-gray-900">
-                        Log in
+                        <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-gray-900">
+                            Log in
                         </a>
-
-                        <a href="{{ route('register') }}"
-                        class="text-sm text-gray-700 hover:text-gray-900">
-                        Register
+                        <a href="{{ route('register') }}" class="text-sm text-gray-700 hover:text-gray-900">
+                            Register
                         </a>
                     </div>
                 @endauth
@@ -111,7 +97,7 @@
         </div>
     </div>
     
- <!-- Responsive Navigation Menu -->
+    <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
@@ -124,16 +110,17 @@
                 {{ __('Categories') }}
             </x-responsive-nav-link>
             @auth
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ auth()->user()->isAdmin() ? __('Orders') : __('My Orders') }}
+                </x-responsive-nav-link>
                 @if(!auth()->user()->isAdmin())
-                    <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                        {{ __('My Orders') }}
-                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
                         {{ __('Cart') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth
         </div>
+
         <!-- Responsive Settings Options -->
         @auth
             <div class="pt-4 pb-1 border-t border-gray-200">
