@@ -8,6 +8,7 @@
             <img src="{{ asset('images/placeholder-book.png') }}" alt="Book placeholder" class="h-full w-full object-cover">
         @endif
     </div>
+    
     <div class="p-4">
         <h3 class="font-semibold text-lg text-gray-800 truncate">{{ $book->title }}</h3>
         <p class="text-gray-600 text-sm">by {{ $book->author }}</p>

@@ -6,13 +6,15 @@
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="md:flex">
             {{-- Book Cover --}}
-        <div class="md:w-1/3 bg-gray-200 p-8 flex items-center justify-center">
-            @if($book->cover_image)
-                <img src="{{ asset('storage/' . $book->cover_image) }}" alt="{{ $book->title }}" class="max-h-96 max-w-full object-contain rounded shadow-lg">
-            @else
-                 <img src="{{ asset('images/placeholder-book.png') }}" alt="Book placeholder" class="h-full w-full object-cover">
-            @endif
-        </div>
+            <div class="md:w-1/3 bg-gray-200 p-8 flex items-center justify-center">
+                @if($book->cover_image)
+                    <img src="{{ asset('storage/' . $book->cover_image) }}" alt="{{ $book->title }}" class="max-h-96 max-w-full object-contain rounded shadow-lg">
+                @else
+                    <svg class="h-48 w-48 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                @endif
+            </div>
 
             {{-- Book Details --}}
             <div class="md:w-2/3 p-8">
@@ -63,7 +65,7 @@
                                     <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $book->stock_quantity }}" class="w-24 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 
-                                <button type="submit" class="bg-indigo-600 text-white px-5 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold mt-6">
+                                <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold mt-6">
                                     Add to Cart
                                 </button>
                             </div>
@@ -104,32 +106,46 @@
     <div class="mt-8">
         <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
 
-        {{-- Review Form (for authenticated users) --}}
+        {{-- Review Form (for authenticated users who purchased the book) --}}
         @auth
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 class="font-semibold text-lg mb-4">Write a Review</h3>
-                <form action="{{ route('reviews.store', $book) }}" method="POST">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2">Rating</label>
-                        <select name="rating" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                            <option value="">Select rating</option>
-                            @for($i = 5; $i >= 1; $i--)
-                                <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
-                            @endfor
-                        </select>
-                    </div>
+            @if(!auth()->user()->isAdmin())
+                @if(auth()->user()->hasPurchased($book->id))
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="font-semibold text-lg mb-4">Write a Review</h3>
+                        <form action="{{ route('reviews.store', $book) }}" method="POST">
+                            @csrf
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Rating *</label>
+                                <select name="rating" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    <option value="">Select rating</option>
+                                    @for($i = 5; $i >= 1; $i--)
+                                        <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
+                                    @endfor
+                                </select>
+                                @error('rating')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2">Comment</label>
-                        <textarea name="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Share your thoughts about this book..."></textarea>
-                    </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Comment</label>
+                                <textarea name="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Share your thoughts about this book..."></textarea>
+                                @error('comment')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
-                        Submit Review
-                    </button>
-                </form>
-            </div>
+                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <x-alert type="info" class="mb-6">
+                        You must purchase this book before you can write a review.
+                    </x-alert>
+                @endif
+            @endif
         @else
             <x-alert type="info" class="mb-6">
                 <a href="{{ route('login') }}" class="text-indigo-600 hover:underline">Login</a> to write a review.
