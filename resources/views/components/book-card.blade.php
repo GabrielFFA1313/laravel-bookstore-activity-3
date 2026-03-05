@@ -29,7 +29,7 @@
             <span class="ml-1 text-sm text-gray-500">({{ $book->reviews->count() }})</span>
         </div>
         {{-- Buttons: View Details first, then Add to Cart below --}}
-        <a href="{{ route('books.show', $book) }}" class="mt-4 block text-center bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition">
+        <a href="{{ route('books.show', $book) }}" class="mt-4 block text-center bg-indigo-600 text-white py-2 rounded hover:bg-gray-700 transition">
             View Details
         </a>
         @auth

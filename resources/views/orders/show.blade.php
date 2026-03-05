@@ -31,24 +31,64 @@
             </span>
         </div>
 
-        {{-- Admin: Update Status Form --}}
+       {{-- Admin: Update Status Form --}}
         @if(auth()->user()->isAdmin())
             <div class="bg-gray-50 rounded-lg p-4 mb-6">
                 <h3 class="font-semibold mb-3">Update Order Status</h3>
-                <form action="{{ route('orders.updateStatus', $order) }}" method="POST" class="flex gap-4">
-                    @csrf
-                    @method('PATCH')
-                    <select name="status" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Processing</option>
-                        <option value="shipped" {{ $order->status === 'shipped' ? 'selected' : '' }}>Shipped</option>
-                        <option value="delivered" {{ $order->status === 'delivered' ? 'selected' : '' }}>Delivered</option>
-                        <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
-                        Update Status
-                    </button>
-                </form>
+                <div class="flex gap-4">
+                    {{-- Progress Status Button --}}
+                    <form action="{{ route('orders.updateStatus', $order) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        @php
+                            $nextStatus = match($order->status) {
+                                'pending' => 'processing',
+                                'processing' => 'shipped',
+                                'shipped' => 'delivered',
+                                default => null
+                            };
+                            
+                            $buttonText = match($nextStatus) {
+                                'processing' => 'Mark as Processing',
+                                'shipped' => 'Mark as Shipped',
+                                'delivered' => 'Mark as Delivered',
+                                default => 'Status Updated'
+                            };
+                        @endphp
+                        
+                        @if($nextStatus)
+                            <input type="hidden" name="status" value="{{ $nextStatus }}">
+                            <button 
+                                type="submit" 
+                                class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
+                            >
+                                {{ $buttonText }}
+                            </button>
+                        @else
+                            <button 
+                                type="button" 
+                                class="bg-gray-400 text-white px-6 py-2 rounded cursor-not-allowed"
+                                disabled
+                            >
+                                {{ $buttonText }}
+                            </button>
+                        @endif
+                    </form>
+
+                    {{-- Cancel Order Button --}}
+                    <form action="{{ route('orders.updateStatus', $order) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="cancelled">
+                        <button 
+                            type="submit" 
+                            class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            {{ in_array($order->status, ['delivered', 'cancelled']) ? 'disabled' : '' }}
+                        >
+                            Cancel Order
+                        </button>
+                    </form>
+                </div>
             </div>
         @endif
 

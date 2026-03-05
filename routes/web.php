@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Admin category routes - CHANGED BACK TO ADMIN
+// Admin category routes
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
@@ -37,7 +37,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
-// Admin book routes - CHANGED BACK TO ADMIN
+// Admin book routes 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
-// Admin order status update - ADDED ADMIN MIDDLEWARE
+// Admin order status update 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });

@@ -11,7 +11,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class BookController extends Controller
 {
-    public function index(Request $request)
+ public function index(Request $request)
 {
     $query = Book::with('category');
 
@@ -38,16 +38,22 @@ class BookController extends Controller
         $query->where('price', '<=', $request->max_price);
     }
 
-    // Filter by rating
+    // Filter by rating 
     if ($request->filled('min_rating')) {
-        $query->whereHas('reviews', function ($q) use ($request) {
-            $q->havingRaw('AVG(rating) >= ?', [$request->min_rating]);
-        });
+        $minRating = $request->min_rating;
+        
+        // Get book IDs that meet the minimum rating requirement
+        $bookIds = \DB::table('reviews')
+            ->select('book_id')
+            ->groupBy('book_id')
+            ->havingRaw('AVG(rating) >= ?', [$minRating])
+            ->pluck('book_id');
+        
+        $query->whereIn('id', $bookIds);
     }
 
     // Sort options
-    $sortBy = $request->get('sort', 'title'); // default sort by title
-    $sortOrder = $request->get('order', 'asc'); // default ascending
+    $sortBy = $request->get('sort', 'title');
 
     switch ($sortBy) {
         case 'price_low':
@@ -57,8 +63,11 @@ class BookController extends Controller
             $query->orderBy('price', 'desc');
             break;
         case 'rating':
-            $query->withAvg('reviews', 'rating')
-                  ->orderBy('reviews_avg_rating', 'desc');
+            // Sub Query
+            $query->leftJoin(\DB::raw('(SELECT book_id, AVG(rating) as avg_rating FROM reviews GROUP BY book_id) as review_avg'), 
+                'books.id', '=', 'review_avg.book_id')
+                ->orderByRaw('COALESCE(review_avg.avg_rating, 0) DESC')
+                ->select('books.*'); 
             break;
         case 'newest':
             $query->orderBy('created_at', 'desc');
@@ -68,11 +77,11 @@ class BookController extends Controller
             break;
         case 'title':
         default:
-            $query->orderBy('title', $sortOrder);
+            $query->orderBy('title', 'asc');
             break;
     }
 
-    $books = $query->paginate(12)->withQueryString(); // Keep filters in pagination
+    $books = $query->paginate(12)->withQueryString();
     $categories = Category::all();
 
     return view('books.index', compact('books', 'categories'));

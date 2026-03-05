@@ -15,68 +15,61 @@ class CartController extends Controller
         return view('cart.index', compact('cart', 'total'));
     }
 
-    public function add(Request $request, Book $book)
-    {
-        $quantity = $request->input('quantity', 1);
-        
-        // Check stock
-        if ($book->stock_quantity < $quantity) {
-            return back()->with('error', 'Not enough stock available.');
+   public function update(Request $request, $bookId)
+{
+    $quantity = $request->input('quantity', 1);
+    $cart = session()->get('cart', []);
+
+    if (isset($cart[$bookId])) {
+        $book = Book::find($bookId);
+
+        if ($quantity <= 0) {
+            return $this->remove($bookId);
         }
 
-        $cart = session()->get('cart', []);
-
-        // If book already in cart, update quantity
-        if (isset($cart[$book->id])) {
-            $newQuantity = $cart[$book->id]['quantity'] + $quantity;
-            
-            if ($newQuantity > $book->stock_quantity) {
-                return back()->with('error', 'Cannot add more than available stock.');
-            }
-            
-            $cart[$book->id]['quantity'] = $newQuantity;
-        } else {
-            // Add new book to cart
-            $cart[$book->id] = [
-                'book_id' => $book->id,
-                'title' => $book->title,
-                'author' => $book->author,
-                'price' => $book->price,
-                'quantity' => $quantity,
-                'cover_image' => $book->cover_image,
-            ];
-        }
-
+        // Cap at available stock instead of erroring
+        $finalQuantity = min($quantity, $book->stock_quantity);
+        $cart[$bookId]['quantity'] = $finalQuantity;
         session()->put('cart', $cart);
 
-        return back()->with('success', 'Book added to cart!');
+        $message = $finalQuantity < $quantity
+            ? "Quantity adjusted to {$finalQuantity} (only {$book->stock_quantity} in stock)."
+            : 'Cart updated!';
+
+        return back()->with('success', $message);
     }
 
-    public function update(Request $request, $bookId)
-    {
-        $quantity = $request->input('quantity', 1);
-        $cart = session()->get('cart', []);
+    return back()->with('error', 'Book not found in cart.');
+}
 
-        if (isset($cart[$bookId])) {
-            $book = Book::find($bookId);
-            
-            if ($quantity > $book->stock_quantity) {
-                return back()->with('error', 'Not enough stock available.');
-            }
+public function add(Request $request, Book $book)
+{
+    $quantity = $request->input('quantity', 1);
+    $cart = session()->get('cart', []);
 
-            if ($quantity <= 0) {
-                return $this->remove($bookId);
-            }
-
-            $cart[$bookId]['quantity'] = $quantity;
-            session()->put('cart', $cart);
-
-            return back()->with('success', 'Cart updated!');
+    if (isset($cart[$book->id])) {
+        $newQuantity = $cart[$book->id]['quantity'] + $quantity;
+        // Cap instead of erroring
+        $finalQuantity = min($newQuantity, $book->stock_quantity);
+        $cart[$book->id]['quantity'] = $finalQuantity;
+    } else {
+        if ($book->stock_quantity === 0) {
+            return back()->with('error', 'This book is out of stock.');
         }
-
-        return back()->with('error', 'Book not found in cart.');
+        $finalQuantity = min($quantity, $book->stock_quantity);
+        $cart[$book->id] = [
+            'book_id'     => $book->id,
+            'title'       => $book->title,
+            'author'      => $book->author,
+            'price'       => $book->price,
+            'quantity'    => $finalQuantity,
+            'cover_image' => $book->cover_image,
+        ];
     }
 
+    session()->put('cart', $cart);
+    return back()->with('success', 'Book added to cart!');
+}
     public function remove($bookId)
     {
         $cart = session()->get('cart', []);

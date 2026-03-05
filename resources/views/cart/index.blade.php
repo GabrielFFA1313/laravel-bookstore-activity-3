@@ -5,18 +5,6 @@
 @section('content')
     <h1 class="text-3xl font-bold mb-6">Shopping Cart</h1>
 
-    @if(session('success'))
-        <x-alert type="success" class="mb-4">
-            {{ session('success') }}
-        </x-alert>
-    @endif
-
-    @if(session('error'))
-        <x-alert type="error" class="mb-4">
-            {{ session('error') }}
-        </x-alert>
-    @endif
-
     @if(count($cart) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Cart Items --}}
@@ -43,12 +31,21 @@
                                     <p class="text-indigo-600 font-semibold mt-1">${{ number_format($item['price'], 2) }}</p>
                                 </div>
 
-                                {{-- Quantity Controls --}}
+                               {{-- Quantity Controls --}}
                                 <div class="flex items-center gap-2">
                                     <form action="{{ route('cart.update', $id) }}" method="POST" class="flex items-center gap-2">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" class="w-16 border-gray-300 rounded text-center">
+                                        @php $book = \App\Models\Book::find($id); @endphp
+                                        <input 
+                                            type="number" 
+                                            name="quantity" 
+                                            value="{{ $item['quantity'] }}" 
+                                            min="1" 
+                                            max="{{ $book->stock_quantity }}"
+                                            class="w-16 border-gray-300 rounded text-center"
+                                            onchange="if(this.value > {{ $book->stock_quantity }}) this.value = {{ $book->stock_quantity }}; if(this.value < 1) this.value = 1;"
+                                        >
                                         <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700">
                                             Update
                                         </button>
@@ -127,4 +124,6 @@
             </a>
         </div>
     @endif
+    
+    
 @endsection
