@@ -30,6 +30,11 @@
                                 {{ __('Cart') }}
                             </x-nav-link>
                         @endif
+                         @if(auth()->user()->isAdmin())
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            {{ __('Users') }}
+                        </x-nav-link>
+                        @endif
                     @endauth
                 </div>
             </div>
@@ -117,6 +122,11 @@
                     <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
                         {{ __('Cart') }}
                     </x-responsive-nav-link>
+                @endif
+                    @if(auth()->user()->isAdmin())
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('Users') }}
+                </x-responsive-nav-link>
                 @endif
             @endauth
         </div>

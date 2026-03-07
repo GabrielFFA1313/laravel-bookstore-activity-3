@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
 use App\Models\Book;
 use App\Models\Review;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller

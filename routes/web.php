@@ -4,9 +4,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\CartController; 
+use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\ReviewController;
+use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Admin\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 // Homepage
@@ -44,6 +45,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/books/{book}/edit', [BookController::class, 'edit'])->name('books.edit');
     Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
     Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::patch('/admin/users/{user}/verify', [AdminUserController::class, 'verify'])->name('admin.users.verify');
+    Route::delete('/admin/users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->name('admin.users.deactivate');
+    Route::patch('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])->name('admin.users.restore');
 });
 
 // Public book routes
@@ -51,7 +56,7 @@ Route::get('/books', [BookController::class, 'index'])->name('books.index');
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
 // Order routes (require authentication)
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -63,13 +68,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 // Review routes (require authentication)
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
 
 // Shopping Cart routes (customers only)
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{book}', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/cart/update/{bookId}', [CartController::class, 'update'])->name('cart.update');

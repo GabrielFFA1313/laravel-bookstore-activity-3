@@ -44,6 +44,10 @@ indigo-700 px-3 py-2 rounded-md">
 
 Add Category
 </a>
+<a href="{{ route('user.index') }}"
+class="hover:bg-indigo-700 px-3 py-2 rounded-md">
+Users
+</a>
 @endif
 @endauth
 </div>

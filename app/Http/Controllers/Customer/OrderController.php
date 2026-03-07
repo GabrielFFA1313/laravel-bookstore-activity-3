@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
 use App\Models\Order;
+use App\Http\Controllers\Controller;
 use App\Models\Book;
 use Illuminate\Http\Request;
 
