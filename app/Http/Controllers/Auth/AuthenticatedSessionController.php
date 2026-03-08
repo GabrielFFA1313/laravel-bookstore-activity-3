@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
+use App\Notifications\NewDeviceLoginNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -45,6 +46,20 @@ class AuthenticatedSessionController extends Controller
 
         // No 2FA — continue normal login
         $request->session()->regenerate();
+
+        // *** New device login notification ***
+        $lastIp = $user->last_login_ip;
+        $currentIp = $request->ip();
+
+        if ($lastIp !== $currentIp) {
+            $user->notify(new NewDeviceLoginNotification(
+                $currentIp,
+                $request->userAgent()
+            ));
+        }
+        
+        // Store current IP for next login comparison
+        $user->forceFill(['last_login_ip' => $currentIp])->save();
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use Illuminate\Http\Request;
+use App\Notifications\OrderPlacedNotification;
+use App\Notifications\OrderStatusUpdatedNotification;
 
 class OrderController extends Controller
 {
@@ -98,6 +100,11 @@ public function store(Request $request)
     session()->put('cart', $adjustedCart);
     session()->forget('cart');
 
+    auth()->user()->notify(new OrderPlacedNotification($order));
+
+    \App\Models\User::where('role', 'admin')->get()
+    ->each(fn($admin) => $admin->notify(new \App\Notifications\NewOrderAdminNotification($order)));
+
     if (!empty($adjustmentMessages)) {
         return redirect()->route('orders.show', $order)
             ->with('success', 'Order placed successfully!')
@@ -126,6 +133,9 @@ public function store(Request $request)
     }
 
         $order->update($validated);
+
+        // *** Fire notification to the customer ***
+        $order->user->notify(new OrderStatusUpdatedNotification($order));
 
         return back()->with('success', 'Order status updated successfully!');
     }

@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\TwoFactorEnabledNotification;
+use App\Notifications\TwoFactorDisabledNotification;
+use App\Notifications\NewDeviceLoginNotification;
 use Illuminate\Support\Str;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -67,6 +70,20 @@ class TwoFactorController extends Controller
         // 2FA passed — complete the login
         session()->forget(['2fa:user_id', '2fa:type', '2fa:remember']);
         Auth::loginUsingId($userId, session('2fa:remember', false));
+
+        // *** New device login notification ***
+        $request = request();
+        $lastIp  = $user->last_login_ip;
+        $currentIp = $request->ip();
+
+        if ($lastIp !== $currentIp) {
+            $user->notify(new NewDeviceLoginNotification(
+                $currentIp,
+                $request->userAgent()
+            ));
+        }
+
+        $user->forceFill(['last_login_ip' => $currentIp])->save();
 
         return redirect()->intended(route('dashboard'));
     }
@@ -159,6 +176,8 @@ class TwoFactorController extends Controller
 
         session()->forget('2fa:totp_setup_secret');
 
+        $request->user()->notify(new TwoFactorEnabledNotification('totp'));
+
         return redirect()->route('profile.edit')->with('status', '2fa-enabled');
     }
 
@@ -175,6 +194,8 @@ class TwoFactorController extends Controller
             'two_factor_otp'            => null,
             'two_factor_otp_expires_at' => null,
         ]);
+
+        $request->user()->notify(new TwoFactorDisabledNotification());
 
         return back()->with('status', '2fa-disabled');
     }
