@@ -13,22 +13,33 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable, SoftDeletes; 
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-    ];
+    'name',
+    'email',
+    'password',
+    'role',
+    'two_factor_type',
+    'two_factor_secret',
+    'two_factor_recovery_codes',
+    'two_factor_confirmed_at',
+    'two_factor_otp',
+    'two_factor_otp_expires_at',
+];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected function casts(): array
+   protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'         => 'datetime',
+            'password'                  => 'hashed',
+            'deleted_at'                => 'datetime',
+            'two_factor_recovery_codes' => 'array',
+            'two_factor_confirmed_at'   => 'datetime',
+            'two_factor_otp_expires_at' => 'datetime',
+            'two_factor_secret'         => 'encrypted',
         ];
     }
 
@@ -57,5 +68,9 @@ class User extends Authenticatable implements MustVerifyEmail
                 $query->where('book_id', $bookId);
             })
             ->exists();
+    }
+    public function hasTwoFactorEnabled(): bool
+    {
+        return ! is_null($this->two_factor_type);
     }
 }

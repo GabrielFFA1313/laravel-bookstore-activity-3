@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\TwoFactorController; 
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -26,13 +27,30 @@ Route::middleware('guest')->group(function () {
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:password-reset')
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:password-reset')
         ->name('password.store');
+
+ // *** 2FA challenge routes (no auth required — user is mid-login) ***
+    Route::get('two-factor-challenge', [TwoFactorController::class, 'challenge'])
+        ->name('two-factor.challenge');
+
+    Route::post('two-factor-challenge', [TwoFactorController::class, 'verify'])
+        ->middleware('throttle:5,1')
+        ->name('two-factor.verify');
+
+    Route::get('two-factor-recovery', [TwoFactorController::class, 'showRecovery'])
+        ->name('two-factor.recovery');
+
+    Route::post('two-factor-recovery', [TwoFactorController::class, 'verifyRecovery'])
+        ->middleware('throttle:5,1')
+        ->name('two-factor.recovery.verify');
 });
 
 Route::middleware('auth')->group(function () {
@@ -56,4 +74,17 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+        
+  // *** 2FA profile management routes ***
+    Route::post('two-factor/enable-email', [TwoFactorController::class, 'enableEmail'])
+        ->name('two-factor.enable.email');
+
+    Route::get('two-factor/setup-totp', [TwoFactorController::class, 'setupTotp'])
+        ->name('two-factor.setup.totp');
+
+    Route::post('two-factor/confirm-totp', [TwoFactorController::class, 'confirmTotp'])
+        ->name('two-factor.confirm.totp');
+
+    Route::post('two-factor/disable', [TwoFactorController::class, 'disable'])
+        ->name('two-factor.disable');
 });

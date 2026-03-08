@@ -177,5 +177,101 @@
                 </form>
             </div>
         </div>
+            {{-- 2FA Panel --}}
+    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+        <div class="max-w-xl">
+            @if(! auth()->user()->hasTwoFactorEnabled())
+
+                {{-- 2FA is OFF --}}
+                <header>
+                    <h2 class="text-lg font-medium text-gray-900">Two-Factor Authentication</h2>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Add an extra layer of security to your account.
+                    </p>
+                </header>
+
+                @if (session('status') === '2fa-disabled')
+                    <p class="mt-2 text-sm text-green-600">2FA has been disabled.</p>
+                @endif
+
+                <div class="mt-6 flex gap-4">
+                    {{-- Enable Email OTP --}}
+                    <form method="POST" action="{{ route('two-factor.enable.email') }}">
+                        @csrf
+                        <button type="submit"
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                            Enable Email OTP
+                        </button>
+                    </form>
+
+                    {{-- Enable Authenticator App --}}
+                    <a href="{{ route('two-factor.setup.totp') }}"
+                       class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900">
+                        Enable Authenticator App
+                    </a>
+                </div>
+
+            @else
+
+                {{-- 2FA is ON --}}
+                <header>
+                    <h2 class="text-lg font-medium text-gray-900">Two-Factor Authentication</h2>
+                    <p class="mt-1 text-sm text-green-600 font-medium">
+                        2FA is active via
+                        {{ auth()->user()->two_factor_type === 'totp' ? 'Authenticator App' : 'Email OTP' }}
+                    </p>
+                </header>
+
+                @if (session('status') === '2fa-enabled')
+                    <p class="mt-2 text-sm text-green-600">
+                        2FA has been enabled. Save your recovery codes below!
+                    </p>
+                @endif
+
+                {{-- Recovery Codes --}}
+                @if(auth()->user()->two_factor_recovery_codes)
+                    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-sm font-medium text-yellow-800 mb-3">
+                            Save these recovery codes in a safe place.
+                            Each can only be used once.
+                        </p>
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach(auth()->user()->two_factor_recovery_codes as $code)
+                                <code class="text-xs font-mono bg-white px-2 py-1 rounded border border-yellow-300">
+                                    {{ $code }}
+                                </code>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Disable 2FA --}}
+                <div class="mt-6">
+                    <p class="text-sm text-gray-600 mb-3">
+                        To disable 2FA, confirm your password below.
+                    </p>
+                    <form method="POST" action="{{ route('two-factor.disable') }}">
+                        @csrf
+                        <div>
+                            <x-input-label for="disable_password" :value="__('Current Password')" />
+                            <x-text-input
+                                id="disable_password"
+                                name="password"
+                                type="password"
+                                class="block mt-1 w-full"
+                            />
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        </div>
+                        <button type="submit"
+                            class="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            onclick="return confirm('Are you sure you want to disable 2FA?')">
+                            Disable 2FA
+                        </button>
+                    </form>
+                </div>
+               @endif
+            </div>
+        </div>
     </div>
+
 @endsection
