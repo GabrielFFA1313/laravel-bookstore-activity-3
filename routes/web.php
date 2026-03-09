@@ -10,14 +10,21 @@ use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Admin\AdminUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Dashboard (from Breeze)
-Route::get('/dashboard', function () {
-    return redirect()->route('home');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])
+    ->middleware(['auth', 'admin'])
+    ->name('dashboard');
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/my-dashboard', [CustomerDashboardController::class, 'index'])
+    ->name('customer.dashboard');
+});
 
 // Profile routes (from Breeze)
 Route::middleware('auth')->group(function () {
@@ -71,7 +78,7 @@ Route::get('/books', [BookController::class, 'index'])->name('books.index');
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
 // Order routes (require authentication)
-Route::middleware('auth', 'verified')->group(function () {
+Route::middleware('auth', 'verified', 'two-factor')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -83,13 +90,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 // Review routes (require authentication)
-Route::middleware('auth', 'verified')->group(function () {
+Route::middleware('auth', 'verified', 'two-factor')->group(function () {
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
 
 // Shopping Cart routes (customers only)
-Route::middleware('auth', 'verified')->group(function () {
+Route::middleware('auth', 'verified', "two-factor")->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{book}', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/cart/update/{bookId}', [CartController::class, 'update'])->name('cart.update');

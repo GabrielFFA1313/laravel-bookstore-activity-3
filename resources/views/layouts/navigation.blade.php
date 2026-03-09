@@ -12,15 +12,35 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                        {{ __('Home') }}
-                    </x-nav-link>
+
+                    @guest
+                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                            {{ __('Home') }}
+                        </x-nav-link>
+                    @endguest
+
+                    @auth
+                        @if(auth()->user()->isAdmin())
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
+                        @else
+                            <x-nav-link :href="route('customer.dashboard')" :active="request()->routeIs('customer.dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                                {{ __('Home') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
+
                     <x-nav-link :href="route('books.index')" :active="request()->routeIs('books.*')">
                         {{ __('Books') }}
                     </x-nav-link>
                     <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                         {{ __('Categories') }}
                     </x-nav-link>
+
                     @auth
                         <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
                             {{ auth()->user()->isAdmin() ? __('Orders') : __('My Orders') }}
@@ -36,10 +56,13 @@
                             </x-nav-link>
                         @endif
                     @endauth
-                </div>
-            </div>
 
-            <!-- Settings Dropdown -->
+                </div>
+                {{-- END Navigation Links --}}
+            </div>
+            {{-- END Left side --}}
+
+            <!-- Settings Dropdown (right side) -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
                 @auth
                     {{-- Bell Icon --}}
@@ -78,13 +101,6 @@
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
-                            @if(Auth::user()->isAdmin())
-                                <x-dropdown-link :href="route('dashboard')">
-                                    {{ __('Admin Dashboard') }}
-                                </x-dropdown-link>
-                            @endif
-
-                            <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
@@ -116,21 +132,42 @@
                     </svg>
                 </button>
             </div>
+
         </div>
     </div>
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                {{ __('Home') }}
-            </x-responsive-nav-link>
+
+            @guest
+                <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                    {{ __('Home') }}
+                </x-responsive-nav-link>
+            @endguest
+
+            @auth
+                @if(auth()->user()->isAdmin())
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
+                @else
+                    <x-responsive-nav-link :href="route('customer.dashboard')" :active="request()->routeIs('customer.dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                        {{ __('Home') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
+
             <x-responsive-nav-link :href="route('books.index')" :active="request()->routeIs('books.*')">
                 {{ __('Books') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                 {{ __('Categories') }}
             </x-responsive-nav-link>
+
             @auth
                 <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
                     {{ auth()->user()->isAdmin() ? __('Orders') : __('My Orders') }}
@@ -145,7 +182,6 @@
                         {{ __('Users') }}
                     </x-responsive-nav-link>
                 @endif
-                {{-- Bell icon for mobile --}}
                 <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.*')">
                     {{ __('Notifications') }}
                     @php $unreadCount = auth()->user()->unreadNotifications->count(); @endphp
@@ -156,6 +192,7 @@
                     @endif
                 </x-responsive-nav-link>
             @endauth
+
         </div>
 
         <!-- Responsive Settings Options -->
@@ -165,19 +202,10 @@
                     <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                     <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
                 </div>
-
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
-
-                    @if(Auth::user()->isAdmin())
-                        <x-responsive-nav-link :href="route('dashboard')">
-                            {{ __('Admin Dashboard') }}
-                        </x-responsive-nav-link>
-                    @endif
-
-                    <!-- Authentication -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-responsive-nav-link :href="route('logout')"

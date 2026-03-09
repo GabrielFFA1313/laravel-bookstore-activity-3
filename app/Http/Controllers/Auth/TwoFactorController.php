@@ -71,6 +71,8 @@ class TwoFactorController extends Controller
         session()->forget(['2fa:user_id', '2fa:type', '2fa:remember']);
         Auth::loginUsingId($userId, session('2fa:remember', false));
 
+        session(['2fa:verified' => true]);
+
         // *** New device login notification ***
         $request = request();
         $lastIp  = $user->last_login_ip;
@@ -85,7 +87,13 @@ class TwoFactorController extends Controller
 
         $user->forceFill(['last_login_ip' => $currentIp])->save();
 
-        return redirect()->intended(route('dashboard'));
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+
+            return redirect()->intended(route('dashboard'));
+        }
+        return redirect()->intended(route('customer.dashboard'));
     }
 
     // Show the recovery code form
@@ -119,7 +127,13 @@ class TwoFactorController extends Controller
         session()->forget(['2fa:user_id', '2fa:type', '2fa:remember']);
         Auth::loginUsingId($userId);
 
-        return redirect()->intended(route('dashboard'));
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+
+            return redirect()->intended(route('dashboard'));
+        }
+        return redirect()->intended(route('customer.dashboard'));
     }
 
     // PROFILE MANAGEMENT

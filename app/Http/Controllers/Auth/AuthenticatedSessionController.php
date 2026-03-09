@@ -61,7 +61,11 @@ class AuthenticatedSessionController extends Controller
         // Store current IP for next login comparison
         $user->forceFill(['last_login_ip' => $currentIp])->save();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        return redirect()->intended(route('customer.dashboard'));
     }
 
     /**

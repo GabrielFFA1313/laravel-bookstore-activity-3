@@ -21,16 +21,17 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($categories as $category)
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-semibold mb-2">{{ $category->name }}</h3>
-                
-                @if($category->description)
-                    <p class="text-gray-600 mb-4">{{ $category->description }}</p>
-                @endif
-                
-                <p class="text-sm text-gray-500 mb-4">{{ $category->books_count }} books</p>
-                
-                <div class="flex flex-wrap gap-2">
+            <div class="bg-white rounded-lg shadow p-6 flex flex-col">  
+                    <h3 class="text-xl font-semibold mb-2">{{ $category->name }}</h3>
+                    
+                    @if($category->description)
+                        <p class="text-gray-600 mb-4">{{ $category->description }}</p>
+                    @endif
+                    
+                    <p class="text-sm text-gray-500 mb-4">{{ $category->books_count }} books</p>
+                    
+                    <div class="flex flex-wrap gap-2 mt-auto"> 
+                        
                     <a href="{{ route('categories.show', $category) }}" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                         View Books
                     </a>

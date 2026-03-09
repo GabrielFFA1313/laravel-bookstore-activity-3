@@ -23,6 +23,12 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+        
+        // *** Logout all other devices ***
+        Auth::logoutOtherDevices($validated['password']);
+
+        // *** Notify user of password change ***
+        $request->user()->notify(new PasswordResetNotification());
 
         return back()->with('status', 'password-updated');
     }
