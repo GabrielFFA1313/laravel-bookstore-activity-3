@@ -31,17 +31,17 @@
                                     <p class="text-indigo-600 font-semibold mt-1">${{ number_format($item['price'], 2) }}</p>
                                 </div>
 
-                               {{-- Quantity Controls --}}
+                                {{-- Quantity Controls --}}
                                 <div class="flex items-center gap-2">
                                     <form action="{{ route('cart.update', $id) }}" method="POST" class="flex items-center gap-2">
                                         @csrf
                                         @method('PATCH')
                                         @php $book = \App\Models\Book::find($id); @endphp
-                                        <input 
-                                            type="number" 
-                                            name="quantity" 
-                                            value="{{ $item['quantity'] }}" 
-                                            min="1" 
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            value="{{ $item['quantity'] }}"
+                                            min="1"
                                             max="{{ $book->stock_quantity }}"
                                             class="w-16 border-gray-300 rounded text-center"
                                             onchange="if(this.value > {{ $book->stock_quantity }}) this.value = {{ $book->stock_quantity }}; if(this.value < 1) this.value = 1;"
@@ -77,10 +77,10 @@
             </div>
 
             {{-- Cart Summary --}}
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1" x-data>
                 <div class="bg-white rounded-lg shadow p-6 sticky top-4">
                     <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-                    
+
                     <div class="space-y-2 mb-4">
                         <div class="flex justify-between text-gray-600">
                             <span>Subtotal ({{ count($cart) }} items)</span>
@@ -99,12 +99,11 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('orders.store') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
-                            Proceed to Checkout
-                        </button>
-                    </form>
+                    {{-- Checkout Button — opens address modal --}}
+                    <button type="button" @click="$dispatch('open-address-modal')"
+                        class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
+                        Proceed to Checkout
+                    </button>
 
                     <a href="{{ route('books.index') }}" class="block text-center text-indigo-600 hover:text-indigo-800 mt-4">
                         Continue Shopping
@@ -112,6 +111,9 @@
                 </div>
             </div>
         </div>
+
+     @include('customer.partials.address_modal', ['addresses' => $addresses])
+
     @else
         <div class="bg-white rounded-lg shadow p-12 text-center">
             <svg class="h-24 w-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,6 +126,5 @@
             </a>
         </div>
     @endif
-    
-    
+
 @endsection

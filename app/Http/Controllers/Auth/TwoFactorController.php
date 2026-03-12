@@ -148,6 +148,7 @@ class TwoFactorController extends Controller
             'two_factor_recovery_codes' => $this->generateRecoveryCodes(),
         ]);
 
+        $user->notify(new TwoFactorEnabledNotification('email'));
         return back()->with('status', '2fa-enabled');
     }
 

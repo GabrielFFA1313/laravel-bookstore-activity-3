@@ -11,8 +11,15 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'address_id',
         'total_amount',
         'status',
+        'shipping_name',
+        'shipping_phone',
+        'shipping_address',
+        'shipping_city',
+        'shipping_province',
+        'shipping_postal_code',
     ];
 
     public function user()
@@ -23,5 +30,10 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
     }
 }

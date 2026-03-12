@@ -30,6 +30,20 @@
                 {{ ucfirst($order->status) }}
             </span>
         </div>
+        {{-- Shipping Address --}}
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold mb-3">Shipping Address</h3>
+                @if($order->shipping_name)
+                    <p class="font-medium text-gray-900">{{ $order->shipping_name }}</p>
+                    <p class="text-sm text-gray-600">{{ $order->shipping_phone }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ $order->shipping_address }}</p>
+                    <p class="text-sm text-gray-600">{{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_postal_code }}</p>
+                @else
+                    <p class="text-sm text-gray-400">No address on record.</p>
+                @endif
+            </div>
+
+        
 
        {{-- Admin: Update Status Form --}}
         @if(auth()->user()->isAdmin())

@@ -74,4 +74,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return ! is_null($this->two_factor_type);
     }
+    public function addresses()
+    {
+        return $this->hasMany(\App\Models\Address::class)->orderByDesc('is_default');
+    }
 }

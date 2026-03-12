@@ -21,7 +21,7 @@
 
                     @auth
                         @if(auth()->user()->isAdmin())
-                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                                 {{ __('Dashboard') }}
                             </x-nav-link>
                         @else
@@ -62,7 +62,7 @@
             </div>
             {{-- END Left side --}}
 
-            <!-- Settings Dropdown (right side) -->
+            <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
                 @auth
                     {{-- Bell Icon --}}
@@ -100,6 +100,12 @@
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
+
+                            @if(!auth()->user()->isAdmin())
+                                <x-dropdown-link :href="route('addresses.index')">
+                                    {{ __('My Addresses') }}
+                                </x-dropdown-link>
+                            @endif
 
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -148,7 +154,7 @@
 
             @auth
                 @if(auth()->user()->isAdmin())
-                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Dashboard') }}
                     </x-responsive-nav-link>
                 @else

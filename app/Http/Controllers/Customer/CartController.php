@@ -8,12 +8,13 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $cart = session()->get('cart', []);
-        $total = $this->calculateTotal($cart);
-        
-        return view('cart.index', compact('cart', 'total'));
+        $cart      = session()->get('cart', []);
+        $total     = $this->calculateTotal($cart);
+        $addresses = auth()->user()->addresses()->get();
+
+        return view('cart.index', compact('cart', 'total', 'addresses'));
     }
 
    public function update(Request $request, $bookId)

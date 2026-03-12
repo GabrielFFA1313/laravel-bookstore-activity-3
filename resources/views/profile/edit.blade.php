@@ -153,30 +153,47 @@
         </div>
 
         <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-            <div class="max-w-xl">
-                <header>
-                    <h2 class="text-lg font-medium text-gray-900">
-                        Delete Account
-                    </h2>
-                    <p class="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and data will be permanently deleted.
-                    </p>
-                </header>
+    <div class="max-w-xl">
+        <header>
+            <h2 class="text-lg font-medium text-gray-900">Delete Account</h2>
+            <p class="mt-1 text-sm text-gray-600">
+                Once your account is deleted, all of its resources and data will be permanently deleted.
+            </p>
+        </header>
 
-                <button 
-                    type="button"
-                    class="mt-6 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                    onclick="if(confirm('Are you sure you want to delete your account? This cannot be undone.')) { document.getElementById('delete-account-form').submit(); }"
+        <form id="delete-account-form" method="post" action="{{ route('profile.destroy') }}" class="mt-6 space-y-4">
+            @csrf
+            @method('delete')
+
+            <div>
+                <label for="delete_password" class="block text-sm font-medium text-gray-700">
+                    Confirm Password
+                </label>
+                <input
+                    id="delete_password"
+                    name="password"
+                    type="password"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                    placeholder="Enter your password to confirm"
                 >
-                    Delete Account
-                </button>
-
-                <form id="delete-account-form" method="post" action="{{ route('profile.destroy') }}" class="hidden">
-                    @csrf
-                    @method('delete')
-                </form>
+                @if ($errors->userDeletion->get('password'))
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ $errors->userDeletion->first('password') }}
+                    </p>
+                @endif
             </div>
-        </div>
+
+            <button
+                type="submit"
+                class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                onclick="return confirm('Are you sure? This cannot be undone.')"
+            >
+                Delete Account
+            </button>
+        </form>
+    </div>
+</div>
+
             {{-- 2FA Panel --}}
     <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
         <div class="max-w-xl">

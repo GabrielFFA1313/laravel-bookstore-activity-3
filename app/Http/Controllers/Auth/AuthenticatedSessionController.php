@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
         $user->forceFill(['last_login_ip' => $currentIp])->save();
 
         if ($user->isAdmin()) {
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return redirect()->intended(route('customer.dashboard'));

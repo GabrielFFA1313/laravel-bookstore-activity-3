@@ -8,9 +8,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Notifications\NewReviewAdminNotification;
 use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ReviewController extends Controller
 {
+    use AuthorizesRequests;
+
     public function store(Request $request, Book $book)
     {
         $this->authorize('create', [Review::class, $book]);

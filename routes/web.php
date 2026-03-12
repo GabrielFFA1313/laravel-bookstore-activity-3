@@ -19,7 +19,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Dashboard (from Breeze)
 Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])
     ->middleware(['auth', 'admin'])
-    ->name('dashboard');
+    ->name('admin.dashboard');
 
     Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-dashboard', [CustomerDashboardController::class, 'index'])
@@ -102,6 +102,15 @@ Route::middleware('auth', 'verified', "two-factor")->group(function () {
     Route::patch('/cart/update/{bookId}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/remove/{bookId}', [CartController::class, 'remove'])->name('cart.remove');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+});
+
+// Addresses (Customer Only)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/addresses', [\App\Http\Controllers\Customer\AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/addresses', [\App\Http\Controllers\Customer\AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('/addresses/{address}/default', [\App\Http\Controllers\Customer\AddressController::class, 'setDefault'])->name('addresses.default');
 });
 
 require __DIR__.'/auth.php';

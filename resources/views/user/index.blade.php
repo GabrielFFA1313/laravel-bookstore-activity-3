@@ -79,6 +79,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
@@ -89,6 +90,11 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($users as $user)
                         <tr class="{{ $user->trashed() ? 'bg-red-50' : '' }}">
+
+                            {{-- ID --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                #{{ $user->id }}
+                            </td>
 
                             {{-- Name --}}
                             <td class="px-6 py-4 whitespace-nowrap">

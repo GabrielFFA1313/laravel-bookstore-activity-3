@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoryController extends Controller
-{
+{   
+    use AuthorizesRequests;
     public function index()
     {
         $categories = Category::withCount('books')->paginate(10);

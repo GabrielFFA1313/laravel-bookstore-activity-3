@@ -48,6 +48,21 @@
                 </div>
             </div>
 
+            {{-- Shipping Address (Admin only) --}}
+            @if(auth()->user()->isAdmin())
+                <div class="border-t pt-4 mb-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Ship To</p>
+                    @if($order->shipping_name)
+                        <p class="text-sm text-gray-700">{{ $order->shipping_name }} · {{ $order->shipping_phone }}</p>
+                        <p class="text-sm text-gray-600">{{ $order->shipping_address }}, {{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_postal_code }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ $order->notes ?? '' }}</p>
+                    @else
+                        <p class="text-sm text-gray-400">No address on record.</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ $order->notes ?? '' }}</p>
+                    @endif
+                </div>
+            @endif
+
             {{-- Order Items --}}
             <div class="border-t pt-4">
                 @foreach($order->orderItems as $item)
@@ -65,6 +80,7 @@
                 <a href="{{ route('orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
                     View Details →
                 </a>
+                
 
                 {{-- Admin: Update Status Form --}}
         @if(auth()->user()->isAdmin())
