@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\BookImportExportController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -42,6 +43,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
+// Admin Imports Route
+Route::middleware(['auth', 'admin'])->group(function () {
+Route::get('/admin/books/import', [BookImportExportController::class, 'showImportForm'])->name('admin.books.import');
+Route::post('/admin/books/import', [BookImportExportController::class, 'import'])->name('admin.books.import.store');
+Route::get('/admin/books/import/template', [BookImportExportController::class, 'downloadTemplate'])->name('admin.books.import.template');
+Route::get('/admin/books/export', [BookImportExportController::class, 'showExportForm'])->name('admin.books.export');
+Route::post('/admin/books/export', [BookImportExportController::class, 'export'])->name('admin.books.export.download');
+});
+
 // Public category routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
@@ -57,6 +67,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('/admin/users/{user}/verify', [AdminUserController::class, 'verify'])->name('admin.users.verify');
     Route::delete('/admin/users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->name('admin.users.deactivate');
     Route::patch('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])->name('admin.users.restore');
+
+    
 });
 
 // Notifications
