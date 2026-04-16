@@ -7,7 +7,7 @@
 
     
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.books.import') }}" class="bg-green-600 text-white mb-2 px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                <a href="{{ route('admin.books.import') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
                     Import Books
                 </a>
                 <a href="{{ route('admin.books.export') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">

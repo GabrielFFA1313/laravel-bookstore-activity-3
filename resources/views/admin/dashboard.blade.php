@@ -245,6 +245,28 @@
             </a>
         </div>
     </div>
+            {{-- Export Actions --}}
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Reports & Exports</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ route('admin.orders.export') }}"
+                    class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-3 rounded-lg hover:bg-indigo-100 transition font-medium text-sm">
+                    ↓ Export Orders
+                </a>
+                <a href="{{ route('admin.orders.revenue') }}"
+                    class="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-3 rounded-lg hover:bg-green-100 transition font-medium text-sm">
+                    ↓ Revenue Report
+                </a>
+                <a href="{{ route('admin.books.import') }}"
+                    class="flex items-center gap-2 bg-yellow-50 text-yellow-700 px-4 py-3 rounded-lg hover:bg-yellow-100 transition font-medium text-sm">
+                    ↑ Import Books
+                </a>
+                <a href="{{ route('admin.books.export') }}"
+                    class="flex items-center gap-2 bg-gray-50 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
+                    ↓ Export Books
+                </a>
+            </div>
+        </div>
 
 </div>
 @endsection

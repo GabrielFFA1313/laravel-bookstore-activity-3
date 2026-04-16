@@ -120,6 +120,14 @@ class OrderController extends Controller
         }
 
         return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully!');
+        
+        // Email invoice PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('customer.invoice', compact('order'));
+            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($order, $pdf) {
+                $message->to($order->user->email)
+                    ->subject('Your PageTurner Invoice - Order #' . $order->id)
+                    ->attachData($pdf->output(), 'invoice_order_' . $order->id . '.pdf');
+            });
     }
 
     public function updateStatus(Request $request, Order $order)

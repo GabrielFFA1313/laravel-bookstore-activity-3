@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BookImportExportController;
+use App\Http\Controllers\Admin\OrderExportController;
+use App\Http\Controllers\Customer\InvoiceController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -45,11 +47,19 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 // Admin Imports Route
 Route::middleware(['auth', 'admin'])->group(function () {
-Route::get('/admin/books/import', [BookImportExportController::class, 'showImportForm'])->name('admin.books.import');
-Route::post('/admin/books/import', [BookImportExportController::class, 'import'])->name('admin.books.import.store');
-Route::get('/admin/books/import/template', [BookImportExportController::class, 'downloadTemplate'])->name('admin.books.import.template');
-Route::get('/admin/books/export', [BookImportExportController::class, 'showExportForm'])->name('admin.books.export');
-Route::post('/admin/books/export', [BookImportExportController::class, 'export'])->name('admin.books.export.download');
+    Route::get('/admin/books/import', [BookImportExportController::class, 'showImportForm'])->name('admin.books.import');
+    Route::post('/admin/books/import', [BookImportExportController::class, 'import'])->name('admin.books.import.store');
+    Route::get('/admin/books/import/template', [BookImportExportController::class, 'downloadTemplate'])->name('admin.books.import.template');
+    Route::get('/admin/books/export', [BookImportExportController::class, 'showExportForm'])->name('admin.books.export');
+    Route::post('/admin/books/export', [BookImportExportController::class, 'export'])->name('admin.books.export.download');
+});
+
+// Admin Orders Route
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/orders/export', [OrderExportController::class, 'showExportForm'])->name('admin.orders.export');
+    Route::post('/admin/orders/export', [OrderExportController::class, 'export'])->name('admin.orders.export.download');
+    Route::get('/admin/orders/revenue', [OrderExportController::class, 'showRevenueForm'])->name('admin.orders.revenue');
+    Route::post('/admin/orders/revenue', [OrderExportController::class, 'exportRevenue'])->name('admin.orders.revenue.download');
 });
 
 // Public category routes
@@ -123,6 +133,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::patch('/addresses/{address}/default', [\App\Http\Controllers\Customer\AddressController::class, 'setDefault'])->name('addresses.default');
+// Invoice
+    Route::get('/orders/{order}/invoice', [InvoiceController::class, 'download'])->name('orders.invoice');
 });
 
 require __DIR__.'/auth.php';
