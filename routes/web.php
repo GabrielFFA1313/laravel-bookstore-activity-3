@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BookImportExportController;
 use App\Http\Controllers\Admin\OrderExportController;
 use App\Http\Controllers\Customer\InvoiceController;
+use App\Http\Controllers\Admin\UserImportExportController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -52,14 +53,17 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/books/import/template', [BookImportExportController::class, 'downloadTemplate'])->name('admin.books.import.template');
     Route::get('/admin/books/export', [BookImportExportController::class, 'showExportForm'])->name('admin.books.export');
     Route::post('/admin/books/export', [BookImportExportController::class, 'export'])->name('admin.books.export.download');
-});
-
 // Admin Orders Route
-Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/orders/export', [OrderExportController::class, 'showExportForm'])->name('admin.orders.export');
     Route::post('/admin/orders/export', [OrderExportController::class, 'export'])->name('admin.orders.export.download');
     Route::get('/admin/orders/revenue', [OrderExportController::class, 'showRevenueForm'])->name('admin.orders.revenue');
     Route::post('/admin/orders/revenue', [OrderExportController::class, 'exportRevenue'])->name('admin.orders.revenue.download');
+// Admin User Import and Export
+Route::get('/admin/users/import', [UserImportExportController::class, 'showImportForm'])->name('admin.users.import');
+Route::post('/admin/users/import', [UserImportExportController::class, 'import'])->name('admin.users.import.store');
+Route::get('/admin/users/import/template', [UserImportExportController::class, 'downloadTemplate'])->name('admin.users.import.template');
+Route::get('/admin/users/export', [UserImportExportController::class, 'showExportForm'])->name('admin.users.export');
+Route::post('/admin/users/export', [UserImportExportController::class, 'export'])->name('admin.users.export.download');
 });
 
 // Public category routes

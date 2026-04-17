@@ -265,6 +265,15 @@
                     class="flex items-center gap-2 bg-gray-50 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
                     ↓ Export Books
                 </a>
+                
+                <a href="{{ route('admin.users.import') }}"
+                    class="flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-3 rounded-lg hover:bg-purple-100 transition font-medium text-sm">
+                    ↑ Import Users
+                </a>
+                <a href="{{ route('admin.users.export') }}"
+                    class="flex items-center gap-2 bg-pink-50 text-pink-700 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-sm">
+                    ↓ Export Users
+                </a>
             </div>
         </div>
 
