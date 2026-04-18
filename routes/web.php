@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\BookImportExportController;
 use App\Http\Controllers\Admin\OrderExportController;
 use App\Http\Controllers\Customer\InvoiceController;
 use App\Http\Controllers\Admin\UserImportExportController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -64,6 +65,12 @@ Route::post('/admin/users/import', [UserImportExportController::class, 'import']
 Route::get('/admin/users/import/template', [UserImportExportController::class, 'downloadTemplate'])->name('admin.users.import.template');
 Route::get('/admin/users/export', [UserImportExportController::class, 'showExportForm'])->name('admin.users.export');
 Route::post('/admin/users/export', [UserImportExportController::class, 'export'])->name('admin.users.export.download');
+
+// Backup
+Route::get('/admin/backup', [BackupController::class, 'index'])->name('admin.backup.index');
+Route::post('/admin/backup/run', [BackupController::class, 'run'])->name('admin.backup.run');
+Route::post('/admin/backup/clean', [BackupController::class, 'clean'])->name('admin.backup.clean');
+Route::get('/admin/backup/download/{filename}', [BackupController::class, 'download'])->name('admin.backup.download');
 });
 
 // Public category routes
