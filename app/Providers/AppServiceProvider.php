@@ -28,5 +28,16 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Verified::class, function ($event) {
             $event->user->notify(new EmailVerifiedNotification());
         });
+        \OwenIt\Auditing\Models\Audit::creating(function ($audit) {
+    \Illuminate\Support\Facades\Log::info('Audit creating', [
+        'auditable_type' => $audit->auditable_type,
+        'event'          => $audit->event,
+        'trace'          => collect(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10))
+            ->pluck('class')
+            ->filter()
+            ->values()
+            ->toArray(),
+    ]);
+});
     }
 }

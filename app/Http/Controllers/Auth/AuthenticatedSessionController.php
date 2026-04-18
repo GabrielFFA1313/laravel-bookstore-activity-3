@@ -9,6 +9,7 @@ use App\Notifications\NewDeviceLoginNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Audit\AuditEvent;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -23,62 +24,64 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
+   public function store(LoginRequest $request): RedirectResponse
+{
+    // Try to authenticate — catch failure for audit logging
+    try {
         $request->authenticate();
-
-        $user = Auth::user();
-
-        // *** 2FA intercept ***
-        // If the user has 2FA enabled, log them out temporarily
-        // and store their ID in session until they verify the code
-        if ($user->hasTwoFactorEnabled()) {
-            Auth::logout();
-
-            session([
-                '2fa:user_id'  => $user->id,
-                '2fa:type'     => $user->two_factor_type,
-                '2fa:remember' => $request->boolean('remember'),
-            ]);
-
-            return redirect()->route('two-factor.challenge');
-        }
-
-        // No 2FA — continue normal login
-        $request->session()->regenerate();
-
-        // *** New device login notification ***
-        $lastIp = $user->last_login_ip;
-        $currentIp = $request->ip();
-
-        if ($lastIp !== $currentIp) {
-            $user->notify(new NewDeviceLoginNotification(
-                $currentIp,
-                $request->userAgent()
-            ));
-        }
-        
-        // Store current IP for next login comparison
-        $user->forceFill(['last_login_ip' => $currentIp])->save();
-
-        if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'));
-        }
-
-        return redirect()->intended(route('customer.dashboard'));
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        AuditEvent::loginFailed($request->email); // only fires on failure
+        throw $e;
     }
+
+    // From here, login was successful
+    AuditEvent::login(auth()->id());
+
+    $user = Auth::user();
+
+    // 2FA intercept
+    if ($user->hasTwoFactorEnabled()) {
+        Auth::logout();
+        session([
+            '2fa:user_id'  => $user->id,
+            '2fa:type'     => $user->two_factor_type,
+            '2fa:remember' => $request->boolean('remember'),
+        ]);
+        return redirect()->route('two-factor.challenge');
+    }
+
+    $request->session()->regenerate();
+
+    // New device login notification
+    $lastIp    = $user->last_login_ip;
+    $currentIp = $request->ip();
+
+    if ($lastIp !== $currentIp) {
+        $user->notify(new NewDeviceLoginNotification($currentIp, $request->userAgent()));
+    }
+
+    $user->forceFill(['last_login_ip' => $currentIp])->save();
+
+    if ($user->isAdmin()) {
+        return redirect()->intended(route('admin.dashboard'));
+    }
+
+    return redirect()->intended(route('customer.dashboard'));
+}
 
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
-    {
-        Auth::guard('web')->logout();
+   public function destroy(Request $request): RedirectResponse
+{
+    $userId = auth()->id(); // ← must be BEFORE logout
 
-        $request->session()->invalidate();
+    Auth::guard('web')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
 
-        $request->session()->regenerateToken();
+    AuditEvent::logout($userId); // ← fires after capturing ID
 
-        return redirect('/');
-    }
+    return redirect('/');
+}
 }

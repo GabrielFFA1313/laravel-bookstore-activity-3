@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\OrderExportController;
 use App\Http\Controllers\Customer\InvoiceController;
 use App\Http\Controllers\Admin\UserImportExportController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -71,6 +72,14 @@ Route::get('/admin/backup', [BackupController::class, 'index'])->name('admin.bac
 Route::post('/admin/backup/run', [BackupController::class, 'run'])->name('admin.backup.run');
 Route::post('/admin/backup/clean', [BackupController::class, 'clean'])->name('admin.backup.clean');
 Route::get('/admin/backup/download/{filename}', [BackupController::class, 'download'])->name('admin.backup.download');
+
+// Audit
+Route::get('/admin/audit', [AuditController::class, 'index'])->name('admin.audit.index');
+Route::get('/admin/audit/{id}', [AuditController::class, 'show'])->name('admin.audit.show');
+Route::get('/admin/audit', [AuditController::class, 'index'])->name('admin.audit.index');
+Route::get('/admin/audit/export/csv', [AuditController::class, 'exportCsv'])->name('admin.audit.export.csv');
+Route::get('/admin/audit/export/pdf', [AuditController::class, 'exportPdf'])->name('admin.audit.export.pdf');
+Route::get('/admin/audit/{id}', [AuditController::class, 'show'])->name('admin.audit.show');
 });
 
 // Public category routes

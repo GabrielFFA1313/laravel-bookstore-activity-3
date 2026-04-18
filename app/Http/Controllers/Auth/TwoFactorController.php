@@ -54,10 +54,12 @@ class TwoFactorController extends Controller
             ) {
                 return back()->withErrors(['code' => 'Invalid or expired code. Please try again.']);
             }
+            User::disableAuditing();
             $user->update([
-                'two_factor_otp'           => null,
+                'two_factor_otp'            => null,
                 'two_factor_otp_expires_at' => null,
             ]);
+            User::enableAuditing();
 
         } elseif ($type === 'totp') {
             $g2fa  = new Google2FA();
@@ -70,12 +72,12 @@ class TwoFactorController extends Controller
         // 2FA passed — complete the login
         session()->forget(['2fa:user_id', '2fa:type', '2fa:remember']);
         Auth::loginUsingId($userId, session('2fa:remember', false));
-
         session(['2fa:verified' => true]);
+        \App\Audit\AuditEvent::login($userId);
 
         // *** New device login notification ***
-        $request = request();
-        $lastIp  = $user->last_login_ip;
+        $request   = request();
+        $lastIp    = $user->last_login_ip;
         $currentIp = $request->ip();
 
         if ($lastIp !== $currentIp) {
@@ -85,14 +87,16 @@ class TwoFactorController extends Controller
             ));
         }
 
+        User::disableAuditing();
         $user->forceFill(['last_login_ip' => $currentIp])->save();
+        User::enableAuditing();
 
         $user = Auth::user();
 
         if ($user->isAdmin()) {
-
             return redirect()->intended(route('dashboard'));
         }
+
         return redirect()->intended(route('customer.dashboard'));
     }
 
@@ -122,17 +126,20 @@ class TwoFactorController extends Controller
 
         // Remove the used code so it can't be reused
         unset($codes[$index]);
+        User::disableAuditing();
         $user->update(['two_factor_recovery_codes' => array_values($codes)]);
+        User::enableAuditing();
 
         session()->forget(['2fa:user_id', '2fa:type', '2fa:remember']);
         Auth::loginUsingId($userId);
+        \App\Audit\AuditEvent::login($userId);
 
         $user = Auth::user();
 
         if ($user->isAdmin()) {
-
             return redirect()->intended(route('dashboard'));
         }
+
         return redirect()->intended(route('customer.dashboard'));
     }
 
@@ -141,14 +148,19 @@ class TwoFactorController extends Controller
     public function enableEmail(Request $request)
     {
         $user = $request->user();
+
+        User::disableAuditing();
         $user->update([
-            'two_factor_type'          => 'email',
+            'two_factor_type'           => 'email',
             'two_factor_secret'         => null,
             'two_factor_confirmed_at'   => now(),
             'two_factor_recovery_codes' => $this->generateRecoveryCodes(),
         ]);
+        User::enableAuditing();
 
         $user->notify(new TwoFactorEnabledNotification('email'));
+        \App\Audit\AuditEvent::twoFactorEnabled($user->id, 'email');
+
         return back()->with('status', '2fa-enabled');
     }
 
@@ -182,16 +194,19 @@ class TwoFactorController extends Controller
             return back()->withErrors(['code' => 'Code does not match. Please try again.']);
         }
 
+        User::disableAuditing();
         $request->user()->update([
-            'two_factor_type'          => 'totp',
+            'two_factor_type'           => 'totp',
             'two_factor_secret'         => $secret,
             'two_factor_confirmed_at'   => now(),
             'two_factor_recovery_codes' => $this->generateRecoveryCodes(),
         ]);
+        User::enableAuditing();
 
         session()->forget('2fa:totp_setup_secret');
 
         $request->user()->notify(new TwoFactorEnabledNotification('totp'));
+        \App\Audit\AuditEvent::twoFactorEnabled($request->user()->id, 'totp');
 
         return redirect()->route('profile.edit')->with('status', '2fa-enabled');
     }
@@ -201,20 +216,22 @@ class TwoFactorController extends Controller
     {
         $request->validate(['password' => 'required|current_password']);
 
+        User::disableAuditing();
         $request->user()->update([
-            'two_factor_type'          => null,
+            'two_factor_type'           => null,
             'two_factor_secret'         => null,
             'two_factor_confirmed_at'   => null,
             'two_factor_recovery_codes' => null,
             'two_factor_otp'            => null,
             'two_factor_otp_expires_at' => null,
         ]);
+        User::enableAuditing();
 
         $request->user()->notify(new TwoFactorDisabledNotification());
+        \App\Audit\AuditEvent::twoFactorDisabled($request->user()->id);
 
         return back()->with('status', '2fa-disabled');
     }
-
 
     // PRIVATE HELPERS
     private function sendEmailOtp(int $userId): void
@@ -222,10 +239,12 @@ class TwoFactorController extends Controller
         $user = User::find($userId);
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
+        User::disableAuditing();
         $user->update([
-            'two_factor_otp'           => $code,
+            'two_factor_otp'            => $code,
             'two_factor_otp_expires_at' => now()->addMinutes(10),
         ]);
+        User::enableAuditing();
 
         Mail::to($user)->send(new TwoFactorOtpMail($code));
     }

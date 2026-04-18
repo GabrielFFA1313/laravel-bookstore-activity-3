@@ -274,12 +274,14 @@
                     class="flex items-center gap-2 bg-pink-50 text-pink-700 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-sm">
                     ↓ Export Users
                 </a>
-
-                            <a href="{{ route('admin.backup.index') }}"
+                <a href="{{ route('admin.backup.index') }}"
                 class="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-3 rounded-lg hover:bg-red-100 transition font-medium text-sm">
                 🗄 Backup & Maintenance
-            </a>
-            
+                </a>
+                 <a href="{{ route('admin.audit.index') }}"
+                    class="flex items-center gap-2 bg-red-50 text-blue-700 px-4 py-3 rounded-lg hover:bg-blue-100 transition font-medium text-sm">
+                    Audit
+                </a>
             </div>
         </div>
 

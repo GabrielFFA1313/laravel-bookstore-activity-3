@@ -25,6 +25,9 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+         // *** Audit log ***
+        \App\Audit\AuditEvent::passwordChanged(auth()->id());
         
         // *** Logout all other devices ***
         Auth::logoutOtherDevices($validated['password']);

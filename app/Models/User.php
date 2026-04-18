@@ -8,9 +8,28 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;  
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable implements MustVerifyEmail
+use OwenIt\Auditing\Contracts\Auditable;         
+use OwenIt\Auditing\Auditable as AuditableTrait;  
+
+class User extends Authenticatable implements MustVerifyEmail, Auditable
 {
-    use HasFactory, Notifiable, SoftDeletes; 
+    use HasFactory, Notifiable, SoftDeletes, AuditableTrait;
+
+    protected array $auditEvents = [
+    'created',
+    'updated',
+    'deleted',
+];
+
+     protected array $auditExclude = [
+        'password',
+        'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_otp',
+        'two_factor_otp_expires_at',
+        'last_login_ip',
+    ];
 
     protected $fillable = [
     'name',
@@ -78,4 +97,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\Address::class)->orderByDesc('is_default');
     }
+    public function transformAudit(array $data): array
+{
+    // Ensure auditable_id is never null
+    if (empty($data['auditable_id'])) {
+        $data['auditable_id'] = $this->id ?? 0;
+    }
+    return $data;
+}
+public function resolveUser()
+{
+    try {
+        return \Illuminate\Support\Facades\Auth::user();
+    } catch (\Exception $e) {
+        return null;
+    }
+}
 }
