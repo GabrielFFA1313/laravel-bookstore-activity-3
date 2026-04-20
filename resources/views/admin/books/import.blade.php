@@ -22,17 +22,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm">
-            {{ session('error') }}
-        </div>
-    @endif
-
     {{-- Upload Form --}}
     <div class="bg-white rounded-xl shadow p-6">
         <form action="{{ route('admin.books.import.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">

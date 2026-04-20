@@ -92,27 +92,6 @@
         </div>
     </div>
 
-    {{-- Order Status Summary --}}
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Status Summary</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            @php
-                $statusColors = [
-                    'pending'    => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                    'processing' => 'bg-blue-100 text-blue-800 border-blue-200',
-                    'shipped'    => 'bg-purple-100 text-purple-800 border-purple-200',
-                    'delivered'  => 'bg-green-100 text-green-800 border-green-200',
-                    'cancelled'  => 'bg-red-100 text-red-800 border-red-200',
-                ];
-            @endphp
-            @foreach($orderStatuses as $status => $count)
-                <div class="border rounded-lg p-4 text-center {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
-                    <p class="text-2xl font-bold">{{ $count }}</p>
-                    <p class="text-sm font-medium capitalize mt-1">{{ $status }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
 
     {{-- Recent Orders + Recent Reviews --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,79 +183,38 @@
         </div>
     </div>
 
-    {{-- Quick Navigation Links --}}
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Navigation</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <a href="{{ route('books.create') }}"
-               class="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 transition group">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-indigo-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span class="text-sm font-medium text-gray-600 group-hover:text-indigo-600 transition">Book Management</span>
-            </a>
-
-            <a href="{{ route('categories.create') }}"
-               class="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-yellow-400 hover:bg-yellow-50 transition group">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-yellow-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                <span class="text-sm font-medium text-gray-600 group-hover:text-yellow-600 transition">Category Management</span>
-            </a>
-
-            <a href="{{ route('orders.index') }}"
-               class="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition group">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span class="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition">Order Management</span>
-            </a>
-
-            <a href="{{ route('admin.users.index') }}"
-               class="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition group">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span class="text-sm font-medium text-gray-600 group-hover:text-green-600 transition">User Management</span>
-            </a>
-        </div>
-    </div>
             {{-- Export Actions --}}
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-lg font-semibold mb-4">Reports & Exports</h2>
             <div class="grid grid-cols-2 gap-3">
                 <a href="{{ route('admin.orders.export') }}"
                     class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-3 rounded-lg hover:bg-indigo-100 transition font-medium text-sm">
-                    ↓ Export Orders
+                     Export Orders
                 </a>
                 <a href="{{ route('admin.orders.revenue') }}"
                     class="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-3 rounded-lg hover:bg-green-100 transition font-medium text-sm">
-                    ↓ Revenue Report
+                     Revenue Report
                 </a>
                 <a href="{{ route('admin.books.import') }}"
                     class="flex items-center gap-2 bg-yellow-50 text-yellow-700 px-4 py-3 rounded-lg hover:bg-yellow-100 transition font-medium text-sm">
-                    ↑ Import Books
+                     Import Books
                 </a>
                 <a href="{{ route('admin.books.export') }}"
                     class="flex items-center gap-2 bg-gray-50 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
-                    ↓ Export Books
+                     Export Books
                 </a>
                 
                 <a href="{{ route('admin.users.import') }}"
                     class="flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-3 rounded-lg hover:bg-purple-100 transition font-medium text-sm">
-                    ↑ Import Users
+                     Import Users
                 </a>
                 <a href="{{ route('admin.users.export') }}"
                     class="flex items-center gap-2 bg-pink-50 text-pink-700 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-sm">
-                    ↓ Export Users
+                     Export Users
                 </a>
                 <a href="{{ route('admin.backup.index') }}"
                 class="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-3 rounded-lg hover:bg-red-100 transition font-medium text-sm">
-                🗄 Backup & Maintenance
+                 Backup & Maintenance
                 </a>
                  <a href="{{ route('admin.audit.index') }}"
                     class="flex items-center gap-2 bg-red-50 text-blue-700 px-4 py-3 rounded-lg hover:bg-blue-100 transition font-medium text-sm">

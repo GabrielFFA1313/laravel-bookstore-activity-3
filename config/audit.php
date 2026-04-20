@@ -16,6 +16,7 @@ return [
     'user' => [
         'morph_prefix' => 'user',
         'guards'       => ['web'],
+        'resolver'     => \App\Audit\UserResolver::class,
     ],
 
     'resolver' => [

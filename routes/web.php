@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\InvoiceController;
 use App\Http\Controllers\Admin\UserImportExportController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AuditController;
+use App\Http\Controllers\Customer\DataPortabilityController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -155,6 +156,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/addresses/{address}/default', [\App\Http\Controllers\Customer\AddressController::class, 'setDefault'])->name('addresses.default');
 // Invoice
     Route::get('/orders/{order}/invoice', [InvoiceController::class, 'download'])->name('orders.invoice');
+
+//Export Data
+Route::get('/my-data', [DataPortabilityController::class, 'index'])->name('customer.data.index');
+Route::get('/my-data/export', [DataPortabilityController::class, 'exportMyData'])->name('customer.data.export');
+Route::get('/my-data/orders/pdf', [DataPortabilityController::class, 'exportOrdersPdf'])->name('customer.data.orders.pdf');
+Route::get('/my-data/orders/csv', [DataPortabilityController::class, 'exportOrdersCsv'])->name('customer.data.orders.csv');
+Route::get('/my-data/reading-history', [DataPortabilityController::class, 'exportReadingHistory'])->name('customer.data.reading-history');
 });
 
 require __DIR__.'/auth.php';

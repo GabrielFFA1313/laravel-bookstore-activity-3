@@ -1,100 +1,152 @@
 <?php
 
-use Illuminate\Support\Str;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-return [
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // ── BOOKS table indexes ───────────────────────────────────────────
+        Schema::table('books', function (Blueprint $table) {
+            // ISBN lookups (import/export, duplicate detection)
+            if (!$this->indexExists('books', 'books_isbn_index')) {
+                $table->index('isbn', 'books_isbn_index');
+            }
+            // Category filtering (browse by category)
+            if (!$this->indexExists('books', 'books_category_id_index')) {
+                $table->index('category_id', 'books_category_id_index');
+            }
+            // Price range filtering
+            if (!$this->indexExists('books', 'books_price_index')) {
+                $table->index('price', 'books_price_index');
+            }
+            // Stock availability checks
+            if (!$this->indexExists('books', 'books_stock_quantity_index')) {
+                $table->index('stock_quantity', 'books_stock_quantity_index');
+            }
+            // Full text search on title and author
+            if (!$this->indexExists('books', 'books_title_author_index')) {
+                $table->index(['title', 'author'], 'books_title_author_index');
+            }
+        });
 
-    'default' => env('DB_CONNECTION', 'pgsql'),
+        // ── ORDERS table indexes ──────────────────────────────────────────
+        Schema::table('orders', function (Blueprint $table) {
+            // Customer order history
+            if (!$this->indexExists('orders', 'orders_user_id_index')) {
+                $table->index('user_id', 'orders_user_id_index');
+            }
+            // Status filtering (admin order management)
+            if (!$this->indexExists('orders', 'orders_status_index')) {
+                $table->index('status', 'orders_status_index');
+            }
+            // Date range filtering for reports
+            if (!$this->indexExists('orders', 'orders_created_at_index')) {
+                $table->index('created_at', 'orders_created_at_index');
+            }
+            // Combined user + status for customer order filtering
+            if (!$this->indexExists('orders', 'orders_user_id_status_index')) {
+                $table->index(['user_id', 'status'], 'orders_user_id_status_index');
+            }
+        });
 
-    'connections' => [
+        // ── ORDER_ITEMS table indexes ─────────────────────────────────────
+        Schema::table('order_items', function (Blueprint $table) {
+            if (!$this->indexExists('order_items', 'order_items_order_id_index')) {
+                $table->index('order_id', 'order_items_order_id_index');
+            }
+            if (!$this->indexExists('order_items', 'order_items_book_id_index')) {
+                $table->index('book_id', 'order_items_book_id_index');
+            }
+        });
 
-        // ── PRIMARY PostgreSQL connection with read/write splitting ────────
-        'pgsql' => [
-            'driver'   => 'pgsql',
+        // ── REVIEWS table indexes ─────────────────────────────────────────
+        Schema::table('reviews', function (Blueprint $table) {
+            if (!$this->indexExists('reviews', 'reviews_book_id_index')) {
+                $table->index('book_id', 'reviews_book_id_index');
+            }
+            if (!$this->indexExists('reviews', 'reviews_user_id_index')) {
+                $table->index('user_id', 'reviews_user_id_index');
+            }
+        });
 
-            // ── READ replicas (for SELECT queries) ────────────────────────
-            'read' => [
-                'host' => array_filter([
-                    env('DB_READ_HOST_1', env('DB_HOST', '127.0.0.1')),
-                    env('DB_READ_HOST_2'), // optional second replica
-                ]),
-            ],
+        // ── USERS table indexes ───────────────────────────────────────────
+        Schema::table('users', function (Blueprint $table) {
+            if (!$this->indexExists('users', 'users_role_index')) {
+                $table->index('role', 'users_role_index');
+            }
+            if (!$this->indexExists('users', 'users_email_verified_at_index')) {
+                $table->index('email_verified_at', 'users_email_verified_at_index');
+            }
+        });
 
-            // ── WRITE master (for INSERT, UPDATE, DELETE) ─────────────────
-            'write' => [
-                'host' => [env('DB_HOST', '127.0.0.1')],
-            ],
+        // ── NOTIFICATIONS table indexes ───────────────────────────────────
+        Schema::table('notifications', function (Blueprint $table) {
+            if (!$this->indexExists('notifications', 'notifications_notifiable_read_at_index')) {
+                $table->index(['notifiable_id', 'read_at'], 'notifications_notifiable_read_at_index');
+            }
+        });
 
-            // Sticky: after a write, subsequent reads in same request
-            // go to the write master to avoid read-after-write inconsistency
-            'sticky' => env('DB_STICKY', true),
+        // ── AUDITS table indexes ──────────────────────────────────────────
+        Schema::table('audits', function (Blueprint $table) {
+            if (!$this->indexExists('audits', 'audits_event_index')) {
+                $table->index('event', 'audits_event_index');
+            }
+            if (!$this->indexExists('audits', 'audits_created_at_index')) {
+                $table->index('created_at', 'audits_created_at_index');
+            }
+        });
+    }
 
-            'port'     => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'postgres'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset'  => 'utf8',
-            'prefix'   => '',
-            'prefix_indexes' => true,
-            'search_path'    => 'public',
-            'sslmode'        => env('DB_SSLMODE', 'prefer'),
-        ],
+    public function down(): void
+    {
+        Schema::table('books', function (Blueprint $table) {
+            $table->dropIndexIfExists('books_isbn_index');
+            $table->dropIndexIfExists('books_category_id_index');
+            $table->dropIndexIfExists('books_price_index');
+            $table->dropIndexIfExists('books_stock_quantity_index');
+            $table->dropIndexIfExists('books_title_author_index');
+        });
 
-        // ── SQLite (kept for testing) ──────────────────────────────────────
-        'sqlite' => [
-            'driver'                  => 'sqlite',
-            'url'                     => env('DB_URL'),
-            'database'                => env('DB_DATABASE', database_path('database.sqlite')),
-            'prefix'                  => '',
-            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-        ],
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropIndexIfExists('orders_user_id_index');
+            $table->dropIndexIfExists('orders_status_index');
+            $table->dropIndexIfExists('orders_created_at_index');
+            $table->dropIndexIfExists('orders_user_id_status_index');
+        });
 
-        'mysql' => [
-            'driver'         => 'mysql',
-            'url'            => env('DB_URL'),
-            'host'           => env('DB_HOST', '127.0.0.1'),
-            'port'           => env('DB_PORT', '3306'),
-            'database'       => env('DB_DATABASE', 'laravel'),
-            'username'       => env('DB_USERNAME', 'root'),
-            'password'       => env('DB_PASSWORD', ''),
-            'unix_socket'    => env('DB_SOCKET', ''),
-            'charset'        => env('DB_CHARSET', 'utf8mb4'),
-            'collation'      => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix'         => '',
-            'prefix_indexes' => true,
-            'strict'         => true,
-            'engine'         => null,
-        ],
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->dropIndexIfExists('order_items_order_id_index');
+            $table->dropIndexIfExists('order_items_book_id_index');
+        });
 
-    ],
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->dropIndexIfExists('reviews_book_id_index');
+            $table->dropIndexIfExists('reviews_user_id_index');
+        });
 
-    'migrations' => [
-        'table'  => 'migrations',
-        'update_date_on_publish' => true,
-    ],
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropIndexIfExists('users_role_index');
+            $table->dropIndexIfExists('users_email_verified_at_index');
+        });
 
-    'redis' => [
-        'client' => env('REDIS_CLIENT', 'phpredis'),
-        'options' => [
-            'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix'  => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
-        ],
-        'default' => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port'     => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_DB', '0'),
-        ],
-        'cache' => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port'     => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '1'),
-        ],
-    ],
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->dropIndexIfExists('notifications_notifiable_read_at_index');
+        });
 
-];
+        Schema::table('audits', function (Blueprint $table) {
+            $table->dropIndexIfExists('audits_event_index');
+            $table->dropIndexIfExists('audits_created_at_index');
+        });
+    }
+
+    private function indexExists(string $table, string $index): bool
+    {
+        return collect(\Illuminate\Support\Facades\DB::select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?",
+            [$table, $index]
+        ))->isNotEmpty();
+    }
+};

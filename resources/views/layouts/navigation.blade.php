@@ -50,6 +50,11 @@
                                 {{ __('Cart') }}
                             </x-nav-link>
                         @endif
+                        @if(!auth()->user()->isAdmin())
+                            <x-dropdown-link :href="route('customer.data.index')">
+                                {{ __('My Data') }}
+                            </x-dropdown-link>
+                        @endif
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                                 {{ __('Users') }}

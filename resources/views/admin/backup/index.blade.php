@@ -10,17 +10,6 @@
         <p class="text-sm text-gray-500 mt-1">Manage database and file backups.</p>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3 text-sm">
-            {{ session('error') }}
-        </div>
-    @endif
-
     {{-- Manual Backup Triggers --}}
     <div class="bg-white rounded-xl shadow p-6">
         <h2 class="text-lg font-semibold mb-4">Run Manual Backup</h2>
@@ -33,7 +22,7 @@
                 <button type="submit"
                     onclick="return confirm('Run a database-only backup now?')"
                     class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
-                    🗄 Database Backup
+                     Database Backup
                     <p class="text-xs font-normal opacity-80 mt-0.5">Database dump only</p>
                 </button>
             </form>
@@ -45,7 +34,7 @@
                 <button type="submit"
                     onclick="return confirm('Run a full backup now? This may take a while.')"
                     class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition font-medium text-sm">
-                    📦 Full Backup
+                     Full Backup
                     <p class="text-xs font-normal opacity-80 mt-0.5">Database + uploaded files</p>
                 </button>
             </form>
