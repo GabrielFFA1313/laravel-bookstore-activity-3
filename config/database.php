@@ -10,35 +10,42 @@ return [
 
         // ── PRIMARY PostgreSQL connection with read/write splitting ────────
         'pgsql' => [
-            'driver'   => 'pgsql',
-
-            // ── READ replicas (for SELECT queries) ────────────────────────
-            'read' => [
-                'host' => array_filter([
-                    env('DB_READ_HOST_1', env('DB_HOST', '127.0.0.1')),
-                    env('DB_READ_HOST_2'), // optional second replica
-                ]),
+        // ── Read replicas — offload heavy reporting queries ──────────────
+        'read' => [
+            'host' => [
+                env('DB_READ_HOST_1', env('DB_HOST', '127.0.0.1')),
+                env('DB_READ_HOST_2', env('DB_HOST', '127.0.0.1')),
             ],
-
-            // ── WRITE master (for INSERT, UPDATE, DELETE) ─────────────────
-            'write' => [
-                'host' => [env('DB_HOST', '127.0.0.1')],
-            ],
-
-            // Sticky: after a write, subsequent reads in same request
-            // go to the write master to avoid read-after-write inconsistency
-            'sticky' => env('DB_STICKY', true),
-
-            'port'     => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'postgres'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset'  => 'utf8',
-            'prefix'   => '',
-            'prefix_indexes' => true,
-            'search_path'    => 'public',
-            'sslmode'        => env('DB_SSLMODE', 'prefer'),
         ],
+
+        // ── Write master — all INSERT/UPDATE/DELETE go here ───────────────
+        'write' => [
+            'host' => [
+                env('DB_HOST', '127.0.0.1'),
+            ],
+        ],
+
+        // ── Sticky: ensures read-after-write consistency ──────────────────
+        // If you write in this request, subsequent reads use write connection
+        'sticky'    => true,
+
+        'driver'    => 'pgsql',
+        'url'       => env('DATABASE_URL'),
+        'port'      => env('DB_PORT', '5432'),
+        'database'  => env('DB_DATABASE', 'laravel'),
+        'username'  => env('DB_USERNAME', 'postgres'),
+        'password'  => env('DB_PASSWORD', ''),
+        'charset'   => 'utf8',
+        'prefix'    => '',
+        'prefix_indexes' => true,
+        'search_path' => 'public',
+        'sslmode'   => 'prefer',
+    ],
+        // ── Connection pooling for high-concurrency (Swoole/RoadRunner) ───
+    'options'  => [
+        \PDO::ATTR_PERSISTENT      => true,   // Reuse connections
+        \PDO::ATTR_EMULATE_PREPARES => true,  // Better compatibility
+    ],
 
         // ── SQLite (kept for testing) ──────────────────────────────────────
         'sqlite' => [
@@ -73,28 +80,45 @@ return [
         'update_date_on_publish' => true,
     ],
 
-    'redis' => [
-        'client' => env('REDIS_CLIENT', 'phpredis'),
-        'options' => [
-            'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix'  => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
-        ],
-        'default' => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port'     => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_DB', '0'),
-        ],
-        'cache' => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port'     => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '1'),
-        ],
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'predis'),
+
+    'options' => [
+        'cluster' => env('REDIS_CLUSTER', 'redis'),
+        'prefix'  => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
     ],
+
+    // Database 0 — General purpose (default Laravel usage)
+    'default' => [
+        'url'      => env('REDIS_URL'),
+        'host'     => env('REDIS_HOST', '127.0.0.1'),
+        'username' => env('REDIS_USERNAME'),
+        'password' => env('REDIS_PASSWORD'),
+        'port'     => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_DB', '0'),
+    ],
+
+    // Database 1 — Query result caching
+    'cache' => [
+        'url'      => env('REDIS_URL'),
+        'host'     => env('REDIS_HOST', '127.0.0.1'),
+        'username' => env('REDIS_USERNAME'),
+        'password' => env('REDIS_PASSWORD'),
+        'port'     => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_CACHE_DB', '1'),
+    ],
+
+    // Database 2 — Session storage
+    'session' => [
+        'url'      => env('REDIS_URL'),
+        'host'     => env('REDIS_HOST', '127.0.0.1'),
+        'username' => env('REDIS_USERNAME'),
+        'password' => env('REDIS_PASSWORD'),
+        'port'     => env('REDIS_PORT', '6379'),
+        'database' => env('REDIS_SESSION_DB', '2'),
+    ],
+
+],
 
 ];

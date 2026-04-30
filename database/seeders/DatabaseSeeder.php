@@ -40,5 +40,8 @@ class DatabaseSeeder extends Seeder
                 ]);
             });
         });
+        $this->call([
+            MassBookSeeder::class,
+        ]);
     }
 }

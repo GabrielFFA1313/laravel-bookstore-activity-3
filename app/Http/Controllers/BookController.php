@@ -15,7 +15,7 @@ class BookController extends Controller
     use AuthorizesRequests;
     public function index(Request $request)
     {
-        $query = Book::with('category');
+        $query = Book::with('category','reviews');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -112,8 +112,10 @@ class BookController extends Controller
 
     public function show(Book $book)
     {
-        $book->load(['category', 'reviews.user']);
-        return view('books.show', compact('book'));
+    $book->load(['category', 'reviews.user']);
+    $book->loadAvg('reviews', 'rating');
+    $book->loadCount('reviews');
+    return view('books.show', compact('book'));
     }
 
     public function edit(Book $book)

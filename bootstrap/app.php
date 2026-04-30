@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Http\Middleware\FilterFields::class,
         \App\Http\Middleware\ETagCache::class,
         \App\Http\Middleware\AddRateLimitHeaders::class,
+        \App\Http\Middleware\LogSlowQueries::class,
+        
 ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

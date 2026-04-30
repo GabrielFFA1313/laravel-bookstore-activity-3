@@ -9,12 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\BookRepository;
+use App\Observers\BookObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+       $this->app->singleton(BookRepository::class, function ($app) {
+        return new BookRepository();
+        });
     }
 
    public function boot(): void
