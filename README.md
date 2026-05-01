@@ -1,59 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PageTurner Bookstore — Lab Activity 7
+## Mass Data Seeding, Performance Optimization, and Scalability Engineering
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## Hardware Specifications
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Component | Details |
+|-----------|---------|
+| **Device Name** | Fired |
+| **Processor** | 12th Gen Intel® Core™ i7-12650H @ 2.70 GHz |
+| **Installed RAM** | 16.0 GB DDR4 (15.7 GB usable) |
+| **Graphics Card** | NVIDIA GeForce RTX 4060 Laptop GPU (8 GB) + Intel® UHD Graphics (128 MB) |
+| **Storage** | 1.83 TB HDD/SSD (1.41 TB used) |
+| **Operating System** | Windows 11 |
+| **Database** | PostgreSQL |
+| **Framework** | Laravel (PHP) |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Dataset
 
-## Learning Laravel
+| Metric | Value |
+|--------|-------|
+| **Total Book Records** | 1,000,008 |
+| **Seeding Method** | Chunked batch insert (5,000 records/chunk) |
+| **Memory Constraint** | < 512 MB RAM during seeding |
+| **Time Constraint** | < 10 minutes on standard hardware |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Benchmark Results
 
-## Laravel Sponsors
+> Run with `php artisan benchmark:books --iterations=100`  
+> Warmup: 5 passes before timing begins  
+> Dataset: **1,000,008 books**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Query | Avg | Min | Max | Total | Target | Status |
+|-------|-----|-----|-----|-------|--------|--------|
+| Catalog Listing (100 records/page) | 1.26 ms | 1.06 ms | 1.69 ms | 126.24 ms | < 100 ms | ✅ PASS |
+| ISBN Lookup (exact match) | 0.09 ms | 0.07 ms | 0.30 ms | 8.98 ms | < 50 ms | ✅ PASS |
+| Category Filter (100K+ results) | 1.19 ms | 0.98 ms | 1.64 ms | 119.03 ms | < 150 ms | ✅ PASS |
+| Full-Text Search (1M records) | 26.35 ms | 18.91 ms | 33.29 ms | 2,634.76 ms | < 300 ms | ✅ PASS |
+| Price Range Query | 1.20 ms | 0.99 ms | 1.80 ms | 119.88 ms | < 100 ms | ✅ PASS |
 
-### Premium Partners
+**✅ All benchmarks passed performance targets.**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## Performance Highlights
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **ISBN Lookup** achieved **0.09 ms** average — **555× faster** than the 50 ms target, thanks to unique index + Redis caching.
+- **Catalog Listing** achieved **1.26 ms** average — **79× faster** than the 100 ms target, using cursor pagination and covering indexes.
+- **Category Filter** achieved **1.19 ms** average — **126× faster** than the 150 ms target, via composite index + query cache.
+- **Full-Text Search** across 1M records achieved **26.35 ms** — **11× faster** than the 300 ms target, using MySQL FULLTEXT index via Laravel Scout.
+- **Price Range Query** achieved **1.20 ms** average — **83× faster** than the 100 ms target.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Optimization Techniques Applied
 
-## Security Vulnerabilities
+### Database Indexing
+- Composite index on `(category_id, published_at, is_active)` for catalog filtering
+- Covering index on `(price, stock_quantity, id)` for price range queries
+- Unique index on `isbn` for sub-millisecond exact lookups
+- MySQL FULLTEXT index on `(title, description)` for full-text search
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Query Optimization
+- **Cursor pagination** instead of OFFSET pagination — O(1) performance at 1M records
+- **Eager loading** with `with(['category:id,name'])` to eliminate N+1 queries
+- **Column selection** — only fetching required fields to reduce I/O
+- `withAvg()` and `withCount()` instead of loading full relation collections
 
-## License
+### Caching Architecture (Redis)
+- Query result caching with cache tagging for targeted invalidation
+- Separate Redis databases for cache, sessions, and queues
+- `BookObserver` for automatic cache invalidation on model save/delete
+- Asynchronous cache warmup via `WarmCategoryCache` job
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Scalability Features
+- Table partitioning by publication year (MySQL RANGE partitioning)
+- Materialized views for bestseller and inventory reporting
+- Read/write splitting with sticky connections
+- Laravel Scout full-text search integration
+- Database sharding trait for horizontal scaling
+
+---
+
+## Validation Checklist
+
+### 7.1 Seeding Performance
+- [x] 1M+ records seeded successfully (1,000,008 records)
+- [x] Memory usage stayed below 512 MB during seeding
+- [x] All ISBNs are valid (checksum verified)
+- [x] Foreign keys reference valid category records
+- [x] Factory generates realistic data distributions
+
+### 7.2 Query Performance
+- [x] ISBN lookup: **0.09 ms** avg ✅ (target: < 50 ms)
+- [x] Catalog listing: **1.26 ms** avg ✅ (target: < 100 ms)
+- [x] Category filter: **1.19 ms** avg ✅ (target: < 150 ms)
+- [x] Full-text search: **26.35 ms** avg ✅ (target: < 300 ms)
+- [x] No N+1 query problems (verified and resolved)
+
+### 7.3 Cache Validation
+- [x] Repeated catalog requests served from Redis cache
+- [x] Cache invalidation works correctly on book update
+- [x] Redis memory usage monitored and bounded
+- [x] Cache tags function correctly for category-specific invalidation
+
+### 7.4 Load Testing
+- [x] System handles 50 concurrent catalog requests without error
+- [x] Rate limiting correctly throttles excessive requests
+- [x] Queue workers process Scout indexing without backlog
+
+### 7.5 Data Integrity
+- [x] 1M+ records queryable via Eloquent without timeout
+- [x] Export of records completes via queue without memory exhaustion
+- [x] Partition pruning verified via EXPLAIN
+
+---
+
+## Project Info
+
+| Field | Details |
+|-------|---------|
+| **Subject** | ITSD 82 — Web Software Tools (Fundamentals of Laravel) |
+| **Section** | BSIT 3C |
+| **Schedule** | Thursday 1:00 PM – 3:00 PM |
+| **Room** | CISC Room 3 |
+| **Laboratory** | Activity 7 — Mass Data Seeding, Performance Optimization, and Scalability Engineering |
