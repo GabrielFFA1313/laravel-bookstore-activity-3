@@ -32,14 +32,22 @@
 
                 <p class="text-3xl font-bold text-indigo-600 mt-4">${{ number_format($book->price, 2) }}</p>
 
-                <div class="mt-4">
-                    <span class="text-sm {{ $book->stock_quantity > 0 ? 'text-green-600' : 'text-red-600' }}">
-                        @if($book->stock_quantity > 0)
-                            In Stock ({{ $book->stock_quantity }} available)
-                        @else
-                            Out of Stock
-                        @endif
-                    </span>
+              <div class="mt-4 space-y-1">
+                    <p class="text-gray-600 text-sm"><strong>Book ID:</strong> #{{ $book->id }}</p>
+                    <p class="text-gray-600 text-sm"><strong>ISBN:</strong> {{ $book->isbn }}</p>
+                    @if($book->publisher)
+                        <p class="text-gray-600 text-sm"><strong>Publisher:</strong> {{ $book->publisher }}</p>
+                    @endif
+                    @if($book->published_at)
+                        <p class="text-gray-600 text-sm"><strong>Published:</strong> {{ \Carbon\Carbon::parse($book->published_at)->format('F j, Y') }}</p>
+                    @endif
+                    @if($book->format)
+                        <p class="text-gray-600 text-sm"><strong>Format:</strong>
+                            <span class="capitalize px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-xs">
+                                {{ $book->format }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
 
                 <div class="mt-4">
@@ -101,8 +109,36 @@
     </div>
 
     {{-- Reviews Section --}}
-    <div class="mt-8">
-        <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
+
+            {{-- AI Review Summary Card --}}
+            @if($book->reviewSummary)
+            <div class="mb-6 p-5 rounded-xl border border-indigo-100 bg-indigo-50">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">AI Review Summary</h3>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium
+                        {{ $book->reviewSummary->sentiment === 'positive' ? 'bg-green-100 text-green-700' : '' }}
+                        {{ $book->reviewSummary->sentiment === 'neutral'  ? 'bg-yellow-100 text-yellow-700' : '' }}
+                        {{ $book->reviewSummary->sentiment === 'negative' ? 'bg-red-100 text-red-700' : '' }}">
+                        {{ ucfirst($book->reviewSummary->sentiment) }}
+                        ({{ number_format($book->reviewSummary->sentiment_score * 100) }}%)
+                    </span>
+                </div>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                    {{ $book->reviewSummary->summary }}
+                </p>
+                <p class="text-xs text-gray-400 mt-3">
+                    Based on {{ $book->reviewSummary->reviews_analyzed }} reviews •
+                    Last analyzed {{ $book->reviewSummary->last_analyzed_at->diffForHumans() }} •
+                    Powered by {{ ucfirst($book->reviewSummary->ai_provider) }}
+                </p>
+            </div>
+            @else
+            <div class="mb-6 p-4 rounded-xl border border-dashed border-gray-300 text-center text-gray-400 text-sm">
+                AI review summary not yet available.
+            </div>
+            @endif
 
         {{-- Review Form (for authenticated users who purchased the book) --}}
         @auth

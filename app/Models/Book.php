@@ -123,4 +123,8 @@ public function makeAllSearchableUsing($query)
         }
         return asset('images/placeholder-book.png');
     }
+    public function reviewSummary()
+    {
+        return $this->hasOne(\App\Models\BookReviewSummary::class);
+    }
 }

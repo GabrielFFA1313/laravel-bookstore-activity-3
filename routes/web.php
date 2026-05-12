@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\UserImportExportController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Customer\DataPortabilityController;
+use App\Http\Controllers\ReviewAnalysisController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController; //already have "DashboardController" and needs another name
 
 // Homepage
@@ -164,5 +165,19 @@ Route::get('/my-data/orders/pdf', [DataPortabilityController::class, 'exportOrde
 Route::get('/my-data/orders/csv', [DataPortabilityController::class, 'exportOrdersCsv'])->name('customer.data.orders.csv');
 Route::get('/my-data/reading-history', [DataPortabilityController::class, 'exportReadingHistory'])->name('customer.data.reading-history');
 });
+
+
+
+// AI
+// Public route
+Route::get('/books/{book}/review-summary', [ReviewAnalysisController::class, 'show']);
+
+// Admin routes
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/review-analysis',              [ReviewAnalysisController::class, 'dashboard']);
+    Route::post('/books/{book}/analyze',        [ReviewAnalysisController::class, 'analyze']);
+    Route::post('/books/bulk-analyze',          [ReviewAnalysisController::class, 'bulkAnalyze']);
+});
+
 
 require __DIR__.'/auth.php';

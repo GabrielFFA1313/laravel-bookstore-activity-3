@@ -15,7 +15,9 @@ class BookController extends Controller
     use AuthorizesRequests;
     public function index(Request $request)
     {
-        $query = Book::with('category','reviews');
+        $query = Book::with('category')
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -46,6 +48,25 @@ class BookController extends Controller
                 ->pluck('book_id');
             $query->whereIn('id', $bookIds);
         }
+        // Format filter
+            if ($request->filled('format')) {
+                $query->where('format', $request->format);
+            }
+
+            // Publisher filter
+            if ($request->filled('publisher')) {
+                $query->where('publisher', 'ilike', "%{$request->publisher}%");
+            }
+
+            // Published year filter
+            if ($request->filled('published_year')) {
+                $query->whereRaw('EXTRACT(YEAR FROM published_at) = ?', [(int) $request->published_year]);
+            }
+
+            // Hide inactive books from non-admins
+            if (!auth()->check() || !auth()->user()->isAdmin()) {
+                $query->where('is_active', true);
+            }
 
         $sortBy = $request->get('sort', 'title');
         switch ($sortBy) {
@@ -99,12 +120,17 @@ class BookController extends Controller
             'stock_quantity' => 'required|integer|min:0',
             'description'    => 'nullable|string',
             'cover_image'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'publisher'      => 'nullable|string|max:255',
+            'published_at'   => 'nullable|date',
+            'format'         => 'nullable|in:hardcover,paperback,ebook,audiobook',
+            'is_active'      => 'boolean',
         ]);
 
         if ($request->hasFile('cover_image')) {
             $validated['cover_image'] = $this->handleImageUpload($request->file('cover_image'));
         }
 
+        $validated['is_active'] = $request->boolean('is_active');
         Book::create($validated);
 
         return redirect()->route('books.index')->with('success', 'Book added successfully!');
@@ -139,6 +165,10 @@ class BookController extends Controller
             'stock_quantity' => 'required|integer|min:0',
             'description'    => 'nullable|string',
             'cover_image'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'publisher'      => 'nullable|string|max:255',
+            'published_at'   => 'nullable|date',
+            'format'         => 'nullable|in:hardcover,paperback,ebook,audiobook',
+            'is_active'      => 'boolean',
         ]);
 
             // Handle image upload
@@ -151,7 +181,7 @@ class BookController extends Controller
             $validated['cover_image'] = $this->handleImageUpload($request->file('cover_image'));
         }
 
-
+        $validated['is_active'] = $request->boolean('is_active');
         $book->update($validated);
 
         return redirect()->route('books.show', $book)->with('success', 'Book updated successfully!');

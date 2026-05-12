@@ -89,34 +89,34 @@
 ## Validation Checklist
 
 ### 7.1 Seeding Performance
-- [x] 1M+ records seeded successfully (1,000,008 records)
-- [x] Memory usage stayed below 512 MB during seeding
-- [x] All ISBNs are valid (checksum verified)
-- [x] Foreign keys reference valid category records
-- [x] Factory generates realistic data distributions
+- [/] 1M+ records seeded successfully (1,000,008 records)
+- [/] Memory usage stayed below 512 MB during seeding
+- [/] All ISBNs are valid (checksum verified)
+- [/] Foreign keys reference valid category records
+- [/] Factory generates realistic data distributions
 
 ### 7.2 Query Performance
-- [x] ISBN lookup: **0.09 ms** avg ✅ (target: < 50 ms)
-- [x] Catalog listing: **1.26 ms** avg ✅ (target: < 100 ms)
-- [x] Category filter: **1.19 ms** avg ✅ (target: < 150 ms)
-- [x] Full-text search: **26.35 ms** avg ✅ (target: < 300 ms)
-- [x] No N+1 query problems (verified and resolved)
+- [/] ISBN lookup: **0.09 ms** avg ✅ (target: < 50 ms)
+- [/] Catalog listing: **1.26 ms** avg ✅ (target: < 100 ms)
+- [/] Category filter: **1.19 ms** avg ✅ (target: < 150 ms)
+- [/] Full-text search: **26.35 ms** avg ✅ (target: < 300 ms)
+- [/] No N+1 query problems (verified and resolved)
 
 ### 7.3 Cache Validation
-- [x] Repeated catalog requests served from Redis cache
-- [x] Cache invalidation works correctly on book update
-- [x] Redis memory usage monitored and bounded
-- [x] Cache tags function correctly for category-specific invalidation
+- [/] Repeated catalog requests served from Redis cache
+- [/] Cache invalidation works correctly on book update
+- [/] Redis memory usage monitored and bounded
+- [/] Cache tags function correctly for category-specific invalidation
 
 ### 7.4 Load Testing
-- [x] System handles 50 concurrent catalog requests without error
-- [x] Rate limiting correctly throttles excessive requests
-- [x] Queue workers process Scout indexing without backlog
+- [/] System handles 50 concurrent catalog requests without error
+- [/] Rate limiting correctly throttles excessive requests
+- [/] Queue workers process Scout indexing without backlog
 
 ### 7.5 Data Integrity
-- [x] 1M+ records queryable via Eloquent without timeout
-- [x] Export of records completes via queue without memory exhaustion
-- [x] Partition pruning verified via EXPLAIN
+- [/] 1M+ records queryable via Eloquent without timeout
+- [/] Export of records completes via queue without memory exhaustion
+- [/] Partition pruning verified via EXPLAIN
 
 ---
 

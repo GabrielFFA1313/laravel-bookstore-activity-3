@@ -293,10 +293,12 @@
                             {{ $recentReviews->first()->created_at->diffForHumans() }}
                         </span>
                     </div>
-                    <a href="{{ route('books.show', $recentReviews->first()->book) }}"
+                    @if($recentReviews->first() && $recentReviews->first()->book)
+                     <a href="{{ route('books.show', $recentReviews->first()->book) }}"
                        class="text-[10px] font-bold text-indigo-200 hover:text-white transition-colors underline underline-offset-2">
                         View Book
                     </a>
+                    @endif
                 </div>
             </div>
             @endif

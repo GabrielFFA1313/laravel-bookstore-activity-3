@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\BookRepository;
 use App\Observers\BookObserver;
+use App\Services\AIServiceManager;
+use App\Services\ReviewAnalysisService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
        $this->app->singleton(BookRepository::class, function ($app) {
         return new BookRepository();
         });
+        $this->app->singleton(AIServiceManager::class);
+        $this->app->singleton(ReviewAnalysisService::class);
     }
 
    public function boot(): void

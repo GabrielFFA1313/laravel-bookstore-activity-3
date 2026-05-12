@@ -58,6 +58,39 @@
                     <textarea name="description" id="description" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('description') }}</textarea>
                 </div>
 
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="publisher" class="block text-gray-700 font-medium mb-2">Publisher</label>
+                        <input type="text" name="publisher" id="publisher" value="{{ old('publisher') }}"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="published_at" class="block text-gray-700 font-medium mb-2">Published Date</label>
+                        <input type="date" name="published_at" id="published_at" value="{{ old('published_at') }}"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="format" class="block text-gray-700 font-medium mb-2">Format</label>
+                        <select name="format" id="format"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select format</option>
+                            <option value="hardcover"  {{ old('format') == 'hardcover'  ? 'selected' : '' }}>Hardcover</option>
+                            <option value="paperback"  {{ old('format') == 'paperback'  ? 'selected' : '' }}>Paperback</option>
+                            <option value="ebook"      {{ old('format') == 'ebook'      ? 'selected' : '' }}>E-Book</option>
+                            <option value="audiobook"  {{ old('format') == 'audiobook'  ? 'selected' : '' }}>Audiobook</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center mt-6">
+                        <input type="checkbox" name="is_active" id="is_active" value="1"
+                            {{ old('is_active', true) ? 'checked' : '' }}
+                            class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        <label for="is_active" class="ml-2 text-gray-700 font-medium">Active (visible to customers)</label>
+                    </div>
+                </div>
+
                 <div class="mb-6">
                     <label for="cover_image" class="block text-gray-700 font-medium mb-2">Cover Image</label>
                     <input type="file" name="cover_image" id="cover_image" accept="image/*" class="w-full border-gray-300 rounded-md shadow-sm">
